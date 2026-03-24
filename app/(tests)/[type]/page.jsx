@@ -83,7 +83,7 @@ export default function TestPage({ params }) {
         throw new Error(result.error || '백엔드 결과 산출 중 문제가 발생했습니다.');
       }
       
-      router.push(`/results/${result.mbtiType}?score=${result.ntiScore}&grade=${result.ntiGrade}&confidence=${result.confidence}`);
+      router.push(`/results/${result.mbtiType}?score=${result.ntiScore}&grade=${result.ntiGrade}&confidence=${result.confidence}&testType=${type}`);
     } catch (e) {
       console.error(e);
       setError('결과 처리 중 서버 오류가 발생했습니다. (사유: DB 스키마 불안정 가능성)');

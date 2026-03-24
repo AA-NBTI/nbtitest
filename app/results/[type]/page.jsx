@@ -28,17 +28,16 @@ function ResultContent() {
   const searchParams = useSearchParams();
   const params = useParams();
 
-  // Hydration 불일치 방지: 타입스크립트처럼 window 객체 대신 Next.js 라우터의 내장 params 활용
   const rawType = params?.type || 'INTJ';
   const mbtiType = typeof rawType === 'string' ? rawType.toUpperCase() : 'INTJ';
 
   const ntiScore = parseInt(searchParams.get('score') || '0');
   const ntiGrade = searchParams.get('grade') || '';
   const confidence = parseInt(searchParams.get('confidence') || '0');
+  const testType = searchParams.get('testType') || 'basic'; // 현재 완료한 테스트 정보
 
   const desc = MBTI_DESC[mbtiType] || '나만의 고유한 성향 유형';
 
-  // NTI 진입 Tier 판정
   let ntiMessage = `신뢰도 ${confidence}% — 트렌드 지수 확인 불가 (75% 이상 필요)`;
   let tier = 0;
 
@@ -49,7 +48,6 @@ function ResultContent() {
     ntiMessage = `신뢰도 ${confidence}% — 일반 쇼핑/연애 분석 개방`;
     tier = 1;
   }
-  const shareUrl = `${process.env.NEXT_PUBLIC_SITE_URL}/api/og?mbti=${mbtiType}&score=${ntiScore}&grade=${ntiGrade}&format=card`;
 
   return (
     <main style={{
@@ -94,21 +92,23 @@ function ResultContent() {
 
       {/* NTI 진입 버튼 분기 */}
       <div style={{ width: '100%', maxWidth: '360px', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-        {/* 결과 화면 상단 광고 (320x100 최적화) */}
+        {/* 결과 화면 상단 광고 */}
         <div className="w-full flex justify-center mb-4 mt-2">
           <AdSlot slotId="RESULT_TOP" mbtiType={mbtiType} />
         </div>
 
         {tier === 0 && (
           <button
-            onClick={() => router.push('/')}
+            onClick={() => router.push(`/?exclude=${testType}`)}
             style={{
-              width: '100%', padding: '1rem', background: '#fff',
-              border: '1px solid #e5e7eb', borderRadius: '10px',
-              fontSize: '0.9rem', color: '#374151', cursor: 'pointer', fontWeight: '500',
+              width: '100%', padding: '1rem', background: '#6366f1',
+              border: 'none', borderRadius: '10px',
+              fontSize: '0.9rem', color: '#fff', cursor: 'pointer', fontWeight: '700',
+              boxShadow: '0 4px 14px rgba(99, 102, 241, 0.3)'
             }}
           >
-            다른 버전으로 한 번 더 테스트하기
+            🔥 방금 하신 것 취향에 맞으신가요?<br />
+            다른 버전(다이나믹/프리미엄)도 해보기
           </button>
         )}
 
@@ -122,10 +122,10 @@ function ResultContent() {
                 fontSize: '0.9rem', color: '#fff', cursor: 'pointer', fontWeight: '600',
               }}
             >
-              쇼핑 트렌드 지수 측정하기
+              🛒 쇼핑 트렌드 지수 측정하기
             </button>
             <button
-              onClick={() => router.push('/')}
+              onClick={() => router.push(`/?exclude=${testType}`)}
               style={{
                 width: '100%', padding: '1rem', background: '#fff',
                 border: '1px solid #e5e7eb', borderRadius: '10px',
@@ -150,7 +150,7 @@ function ResultContent() {
           </button>
         )}
 
-        {/* 다시 테스트 하기 버튼 */}
+        {/* 다시 테스트 하기 버튼 (홈으로 이동) */}
         <button
           onClick={() => router.push('/')}
           style={{
@@ -162,7 +162,7 @@ function ResultContent() {
           ↻ 처음부터 다시 테스트 하기
         </button>
 
-        {/* 결과 화면 하단 광고 (320x100 최적화) */}
+        {/* 결과 화면 하단 광고 */}
         <div className="w-full flex justify-center mt-4">
           <AdSlot slotId="RESULT_BOTTOM" mbtiType={mbtiType} />
         </div>
