@@ -1,4 +1,5 @@
 import './globals.css';
+import { GlobalStickyBanner } from '@/components/GlobalStickyBanner';
 
 export const metadata = {
   title: 'NBTI — Next Behavioral Trend Indicator',
@@ -25,7 +26,10 @@ export default function RootLayout({ children }) {
       <head>
         <link rel="preconnect" href="https://cdn.jsdelivr.net" />
       </head>
-      <body style={{ margin: 0, padding: 0 }}>
+      {/* paddingTop 50px: 상단 고정 배너가 콘텐츠를 가리지 않도록 */}
+      <body style={{ margin: 0, padding: 0, paddingTop: '100px' }}>
+        {/* 05. MAIN_TOP: 375×50 전체 페이지 공통 상단 고정 띠배너 */}
+        <GlobalStickyBanner />
         {children}
       </body>
     </html>

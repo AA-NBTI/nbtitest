@@ -13,7 +13,9 @@ export default function LandingPage() {
   const router = useRouter();
 
   return (
-    <main style={{
+    <div className="bg-[#fafafa] min-h-screen">
+
+      <main style={{
       minHeight: '100vh',
       background: '#fafafa',
       display: 'flex',
@@ -86,5 +88,6 @@ export default function LandingPage() {
         3회 완료 시 NTI 트렌드 지수를 확인할 수 있습니다
       </p>
     </main>
+    </div>
   );
 }

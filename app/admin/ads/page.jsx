@@ -9,6 +9,10 @@ export default function AdsDashboard() {
   const [ads, setAds] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterStatus, setFilterStatus] = useState('all');
+  const [filterPlacement, setFilterPlacement] = useState('all');
+
   const [form, setForm] = useState({
     brand_name: '', placement: 'LOADING', target_mbti: '', title: '', link_url: '', emoji_icon: '🛍️', target_test: 'all', cpc: 250,
     banner_img_url: '', pricing_model: 'CPC', daily_budget: 10000, ad_format: 'BANNER'
@@ -67,6 +71,17 @@ export default function AdsDashboard() {
     fetchAds();
   }
 
+  const filteredAds = ads.filter(ad => {
+    if (filterStatus === 'active' && !ad.is_active) return false;
+    if (filterStatus === 'inactive' && ad.is_active) return false;
+    if (filterPlacement !== 'all' && ad.placement !== filterPlacement) return false;
+    if (searchTerm) {
+      const lower = searchTerm.toLowerCase();
+      if (!ad.brand_name?.toLowerCase().includes(lower) && !ad.title?.toLowerCase().includes(lower)) return false;
+    }
+    return true;
+  });
+
   return (
     <div className="p-6 md:p-12 font-sans text-slate-900 mx-auto max-w-[1400px]">
       <div className="flex justify-between items-end mb-10 border-b border-slate-100 pb-10">
@@ -84,6 +99,59 @@ export default function AdsDashboard() {
         </button>
       </div>
 
+      {/* 워드프레스 스타일: 상단 필터 및 검색 바 */}
+      <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+        {/* 상태 필터 탭 */}
+        <div className="flex items-center gap-4 text-sm font-bold">
+          <button 
+            onClick={() => setFilterStatus('all')}
+            className={`transition-colors ${filterStatus === 'all' ? 'text-indigo-600 font-black' : 'text-slate-500 hover:text-slate-700'}`}
+          >
+            전체 캠페인 ({ads.length})
+          </button>
+          <span className="text-slate-300">|</span>
+          <button 
+            onClick={() => setFilterStatus('active')}
+            className={`transition-colors ${filterStatus === 'active' ? 'text-emerald-600 font-black' : 'text-slate-500 hover:text-slate-700'}`}
+          >
+            발행됨 - 송출중 ({ads.filter(a => a.is_active).length})
+          </button>
+          <span className="text-slate-300">|</span>
+          <button 
+            onClick={() => setFilterStatus('inactive')}
+            className={`transition-colors ${filterStatus === 'inactive' ? 'text-slate-900 font-black' : 'text-slate-500 hover:text-slate-700'}`}
+          >
+            비활성화 - 임시보관 ({ads.filter(a => !a.is_active).length})
+          </button>
+        </div>
+
+        {/* 위치 필터 및 검색 */}
+        <div className="flex items-center gap-3 w-full md:w-auto">
+          <select 
+            className="p-2 border border-slate-200 rounded-lg text-sm bg-white text-slate-700 focus:outline-none focus:border-indigo-500"
+            value={filterPlacement}
+            onChange={(e) => setFilterPlacement(e.target.value)}
+          >
+            <option value="all">모든 구좌 (All Placements)</option>
+            <option value="TEST_FIXED_TOP">01 · 상단 고정 전광판 (프리미엄)</option>
+            <option value="TEST_FIXED_BOTTOM">02 · 하단 고정 스티키 320×50 (1순위)</option>
+            <option value="NATIVE_LIKERT">03 · 스텔스 테스트</option>
+            <option value="LOADING">04 · 브랜드 삽입</option>
+            <option value="MAIN_TOP">05 · 메인 상단 앱 배너 (스티키)</option>
+            <option value="RESULT_TOP">06 · 결과 화면 상단 320×100</option>
+            <option value="RESULT_BOTTOM">07 · 결과 화면 하단 320×100</option>
+          </select>
+
+          <input 
+            type="text" 
+            placeholder="브랜드명 또는 카피 검색..." 
+            className="p-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-indigo-500 w-full md:w-64 bg-white shadow-sm"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+      </div>
+
       {/* 리스트 뷰형 테이블 */}
       <div className="bg-white rounded-[32px] border border-slate-200 shadow-sm overflow-hidden mb-12">
         <table className="w-full text-left border-collapse">
@@ -97,8 +165,8 @@ export default function AdsDashboard() {
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
-            {ads.map((ad) => (
-              <tr key={ad.ad_id} className={`transition-all hover:bg-slate-50/50 ${!ad.is_active && 'opacity-60 bg-slate-50/30'}`}>
+            {filteredAds.map((ad) => (
+              <tr key={ad.ad_id} className={`transition-all hover:bg-slate-50/50 group ${!ad.is_active && 'opacity-60 bg-slate-50/30'}`}>
                 {/* 1. 활성 상태 (전원 스위치) */}
                 <td className="py-6 px-8 w-40">
                   <button 
@@ -189,11 +257,11 @@ export default function AdsDashboard() {
                 </td>
               </tr>
             ))}
-            {ads.length === 0 && (
+            {filteredAds.length === 0 && (
               <tr>
                 <td colSpan="5" className="py-20 text-center text-slate-400 font-bold text-sm bg-slate-50/50">
                   <Megaphone size={48} className="mx-auto text-slate-300 mb-4" />
-                  현재 파트너십을 맺은 활성 브랜드 캠페인이 없습니다. 신규 캠페인을 등록해수제요.
+                  검색 조건에 일치하는 캠페인이 없습니다.
                 </td>
               </tr>
             )}
@@ -227,21 +295,34 @@ export default function AdsDashboard() {
                   </div>
                  
                  <div className="space-y-6 flex-1 pt-2">
-                    {/* 광고 포맷 듀얼 셀렉터 */}
+                    {/* 광고 구좌 및 포맷 셀렉터 */}
                     <div className="bg-slate-50 p-6 rounded-3xl border border-slate-100">
-                      <h3 className="text-sm font-black text-slate-800 mb-4 flex items-center gap-2"><Layout size={16}/> 1. 광고 송출 포맷 (Ad Format 상품) 선택</h3>
+                      <h3 className="text-sm font-black text-slate-800 mb-4 flex items-center gap-2"><Layout size={16}/> 1. 광고 송출 구좌 및 포맷 선택</h3>
+                      <div className="mb-6">
+                        <p className="text-xs font-bold text-slate-500 ml-2 mb-1.5">구좌 위치 (어디에 노출할 것인가요?)</p>
+                        <select className="w-full p-4 bg-white border border-slate-200 rounded-2xl outline-none font-bold text-sm text-slate-700 shadow-sm" value={form.placement} onChange={e => setForm({...form, placement: e.target.value})}>
+                           <option value="TEST_FIXED_TOP">01 · 상단 고정 전광판 (프리미엄 | CPM)</option>
+                           <option value="TEST_FIXED_BOTTOM">02 · 하단 고정 스티키 320×50 (1순위 | CPM)</option>
+                           <option value="NATIVE_LIKERT">03 · 스텔스 테스트 (위장형 | CPA)</option>
+                           <option value="LOADING">04 · 브랜드 삽입 — 문항 사이 띠배너</option>
+                           <option value="MAIN_TOP">05 · 메인 상단 앱 배너 스티키 (CPC/CPM)</option>
+                           <option value="RESULT_TOP">06 · 결과 화면 상단 320×100 (CPC/CPM)</option>
+                           <option value="RESULT_BOTTOM">07 · 결과 화면 하단 320×100 (커머스 전환)</option>
+                        </select>
+                      </div>
+                      <p className="text-xs font-bold text-slate-500 ml-2 mb-1.5">광고 송출 포맷 (어떤 형태로 노출할 것인가요?)</p>
                       <div className="flex gap-3">
                         <label className={`flex-1 p-3 border rounded-2xl cursor-pointer transition-all ${form.ad_format === 'BANNER' ? 'border-indigo-500 bg-indigo-50/50 shadow-md ring-2 ring-indigo-500/20' : 'border-slate-200 bg-white hover:border-slate-300'}`} onClick={() => setForm({...form, ad_format: 'BANNER'})}>
                           <span className="block text-sm font-black text-slate-800 mb-1">디스플레이 띠배너</span>
-                          <span className="block text-[10px] text-slate-500 font-bold leading-snug">실제 문항 질문지 하단에 스폰서 외부 링크 전용 배너 삽입</span>
+                          <span className="block text-[10px] text-slate-500 font-bold leading-snug">이미지로 승부 (카피 불필요)</span>
                         </label>
                         <label className={`flex-1 p-3 border rounded-2xl cursor-pointer transition-all ${form.ad_format === 'SPONSORED_LIKERT' ? 'border-emerald-500 bg-emerald-50/50 shadow-md ring-2 ring-emerald-500/20' : 'border-slate-200 bg-white hover:border-slate-300'}`} onClick={() => setForm({...form, ad_format: 'SPONSORED_LIKERT'})}>
-                          <span className="block text-sm font-black text-slate-800 mb-1">공식 스폰서 문항 (오리지널)</span>
-                          <span className="block text-[10px] text-slate-500 font-bold leading-snug">대형 브랜드 후원 라벨표와 함께 7점 척도 문항으로 공식 노출</span>
+                          <span className="block text-sm font-black text-slate-800 mb-1">공식 스폰서 문항</span>
+                          <span className="block text-[10px] text-slate-500 font-bold leading-snug">대형 브랜드 후원 라벨표와 함께 노출</span>
                         </label>
                         <label className={`flex-1 p-3 border rounded-2xl cursor-pointer transition-all ${form.ad_format === 'NATIVE_LIKERT' ? 'border-amber-500 bg-amber-50/50 shadow-md ring-2 ring-amber-500/20' : 'border-slate-200 bg-white hover:border-slate-300'}`} onClick={() => setForm({...form, ad_format: 'NATIVE_LIKERT'})}>
                           <span className="block text-sm font-black text-slate-800 mb-1">네이티브 문항 침투</span>
-                          <span className="block text-[10px] text-slate-500 font-bold leading-snug">일반 테스트 성격 문항인 것처럼 광고를 100% 위장하여 삽입</span>
+                          <span className="block text-[10px] text-slate-500 font-bold leading-snug">일반 테스트인 것처럼 100% 위장</span>
                         </label>
                       </div>
                     </div>
@@ -269,7 +350,14 @@ export default function AdsDashboard() {
                       <h3 className="text-sm font-black text-slate-800 mb-4 flex items-center gap-2"><ImageIcon size={16}/> 3. 미디어 및 아웃바운드 링크 설정</h3>
                       <div className="mb-4">
                         <p className="text-xs font-bold text-slate-500 ml-2 mb-1">디스플레이 배너 이미지 URL 주소</p>
-                        <p className="text-[10px] font-black tracking-widest text-amber-600 mb-2 ml-2 bg-amber-100 w-max px-2 py-1 rounded-md">권장 규격: 600px × 300px (2:1 와이드) IAB 모바일 표준</p>
+                         <p className="text-[10px] font-black tracking-widest text-amber-600 mb-2 ml-2 bg-amber-100 w-max px-2 py-1 rounded-md">
+                           권장 규격: {
+                             form.placement === 'TEST_FIXED_BOTTOM' ? '320×50 (모바일 스티키 표준)' :
+                             form.placement === 'RESULT_TOP' || form.placement === 'RESULT_BOTTOM' ? '320×100 (Large Mobile Banner)' :
+                             form.placement === 'MAIN_TOP' ? '375×100 (전체 페이지 상단 고정 대형 배너)' :
+                             '600×300 (2:1 와이드 IAB 표준)'
+                           }
+                         </p>
                         <input type="text" placeholder="https://image-url.com/banner.jpg" className="w-full p-4 bg-white rounded-2xl border border-slate-200 focus:border-amber-500 outline-none font-bold text-sm text-lime-900 shadow-sm" value={form.banner_img_url} onChange={e => setForm({...form, banner_img_url: e.target.value})} />
                       </div>
                       
@@ -279,7 +367,7 @@ export default function AdsDashboard() {
 
                     <div className="bg-slate-50 p-6 rounded-3xl border border-slate-100">
                        <h3 className="text-sm font-black text-slate-800 mb-4 flex items-center gap-2"><CreditCard size={16}/> 4. 타겟팅 및 상업 (과금) 조건</h3>
-                       <div className="grid grid-cols-2 gap-4 mb-4">
+                       <div className="grid grid-cols-1 gap-4 mb-4">
                          <div>
                            <p className="text-xs font-bold text-slate-500 ml-2 mb-1.5">노출 타겟팅 (Target)</p>
                            <select className="w-full p-4 bg-white border border-slate-200 rounded-2xl outline-none font-bold text-sm text-slate-700 shadow-sm" value={form.target_test} onChange={e => setForm({...form, target_test: e.target.value})}>
@@ -288,13 +376,6 @@ export default function AdsDashboard() {
                               <option value="love">연애 세포 테스트 전용</option>
                               <option value="job">직장 생활 테스트 전용</option>
                               <option value="dynamic">스피드(다이나믹) 28문항 전용</option>
-                           </select>
-                         </div>
-                         <div>
-                           <p className="text-xs font-bold text-slate-500 ml-2 mb-1.5">구좌 위치 (Placement)</p>
-                           <select className="w-full p-4 bg-white border border-slate-200 rounded-2xl outline-none font-bold text-sm text-slate-700 shadow-sm" value={form.placement} onChange={e => setForm({...form, placement: e.target.value})}>
-                              <option value="LOADING">테스트 문항 사이 (매복)</option>
-                              <option value="RESULT_CARD">결과 페이지 하단 (종료)</option>
                            </select>
                          </div>
                        </div>

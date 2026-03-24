@@ -1,6 +1,6 @@
 'use client';
 
-import { ShieldCheck, LayoutDashboard, Users, Megaphone, BarChart3, Activity } from 'lucide-react';
+import { ShieldCheck, LayoutDashboard, Users, Megaphone, BarChart3, Activity, BookOpen } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
@@ -11,7 +11,8 @@ export default function AdminLayout({ children }) {
     { name: 'MBTI 테스트 분석', path: '/admin', icon: Activity },
     { name: '광고 퍼포먼스 통계', path: '/admin/stats', icon: LayoutDashboard },
     { name: '제휴 파트너사 목록', path: '/admin/brands', icon: Users },
-    { name: '스폰서 캠페인 관리', path: '/admin/ads', icon: Megaphone }
+    { name: '스폰서 캠페인 관리', path: '/admin/ads', icon: Megaphone },
+    { name: '광고 상품 구성', path: '/admin/ad-products', icon: BookOpen }
   ];
 
   return (

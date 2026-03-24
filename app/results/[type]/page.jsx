@@ -2,6 +2,7 @@
 
 import { useRouter, useSearchParams, useParams } from 'next/navigation';
 import { Suspense } from 'react';
+import { AdSlot } from '@/components/AdSlot';
 
 const MBTI_DESC = {
   INTJ: '전략가형 — 독립적이고 결단력 있는 사고가',
@@ -93,6 +94,11 @@ function ResultContent() {
 
       {/* NTI 진입 버튼 분기 */}
       <div style={{ width: '100%', maxWidth: '360px', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+        {/* 결과 화면 상단 광고 (320x100 최적화) */}
+        <div className="w-full flex justify-center mb-4 mt-2">
+          <AdSlot slotId="RESULT_TOP" mbtiType={mbtiType} />
+        </div>
+
         {tier === 0 && (
           <button
             onClick={() => router.push('/')}
@@ -155,6 +161,11 @@ function ResultContent() {
         >
           ↻ 처음부터 다시 테스트 하기
         </button>
+
+        {/* 결과 화면 하단 광고 (320x100 최적화) */}
+        <div className="w-full flex justify-center mt-4">
+          <AdSlot slotId="RESULT_BOTTOM" mbtiType={mbtiType} />
+        </div>
       </div>
     </main>
   );

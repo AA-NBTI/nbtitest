@@ -13,15 +13,17 @@ export const useTestStore = create((set, get) => ({
   sessionId: null,
   isTransitioning: false,
   clickedAds: [],
+  fixedAds: { top: null, bottom: null },
 
-  initTest: (profileId, sessionId, questions) => set({
+  initTest: (profileId, sessionId, questions, fixedAds) => set({
     profileId,
     sessionId,
     questions,
     currentIndex: 0,
     answers: [],
     clickedAds: [],
-    isTransitioning: false
+    isTransitioning: false,
+    fixedAds: fixedAds || { top: null, bottom: null }
   }),
 
   recordAdClick: (adId) => set((state) => ({

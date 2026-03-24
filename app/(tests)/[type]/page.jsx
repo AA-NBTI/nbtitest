@@ -17,24 +17,31 @@ export default function TestPage({ params }) {
   useEffect(() => {
     async function loadTest() {
       try {
-        // 1. 세션 생성 및 문항 조회를 병렬 발사 (체감 로딩시간 대폭 단축)
-        const [initRes, qRes] = await Promise.all([
-          fetch('/api/start-session', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ testVersion: type })
-          }),
-          fetch(`/api/questions?type=${type}`, { cache: 'no-store' })
-        ]);
-
-        const initData = await initRes.json();
-        if (initData.error) throw new Error(initData.error);
-
+        // 1. 문항 데이터만 최우선으로 가져와서 화면 즉시 렌더링 (체감 속도 0.1초 컷)
+        const qRes = await fetch(`/api/questions?type=${type}`);
         const qData = await qRes.json();
+        
         if (qData.error) throw new Error(qData.error);
 
-        initTest(initData.profileId, initData.sessionId, qData.questions);
+        // 먼저 세션/프로필 없이 문항만 세팅 후 테스트 시작 (블로킹 해제)
+        initTest(null, null, qData.questions, qData.fixedAds);
         setLoading(false);
+
+        // 2. 가장 느린 DB 작업(프로필+세션 insert)은 백그라운드 비동기로 병렬 처리 후 나중에 값만 주입
+        fetch('/api/start-session', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ testVersion: type })
+        })
+          .then(res => res.json())
+          .then(initData => {
+            if (!initData.error) {
+              // 백그라운드에서 ID 확보 완료 시 Store에 조용히 병합
+              useTestStore.setState({ profileId: initData.profileId, sessionId: initData.sessionId });
+            }
+          })
+          .catch(err => console.error("Background session init failed:", err));
+
       } catch (e) {
         console.error("loadTest Error:", e);
         setError('초기화 실패: ' + (e.message || JSON.stringify(e)));
