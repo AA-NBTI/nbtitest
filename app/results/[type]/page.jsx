@@ -34,10 +34,22 @@ function ResultContent() {
   const ntiScore = parseInt(searchParams.get('score') || '0');
   const ntiGrade = searchParams.get('grade') || '';
   const confidence = parseInt(searchParams.get('confidence') || '0');
-  const testType = searchParams.get('testType') || 'basic'; // 현재 완료한 테스트 정보
+  const testType = searchParams.get('testType') || 'basic';
 
   const desc = MBTI_DESC[mbtiType] || '나만의 고유한 성향 유형';
 
+  // [고도화] 테스트 완료 내역을 로컬 스토리지에 누적 저장
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const completed = JSON.parse(localStorage.getItem('completed_nbti_tests') || '[]');
+      if (!completed.includes(testType)) {
+        completed.push(testType);
+        localStorage.setItem('completed_nbti_tests', JSON.stringify(completed));
+      }
+    }
+  }, [testType]);
+
+  // NTI 진입 Tier 판정
   let ntiMessage = `신뢰도 ${confidence}% — 트렌드 지수 확인 불가 (75% 이상 필요)`;
   let tier = 0;
 
@@ -48,6 +60,10 @@ function ResultContent() {
     ntiMessage = `신뢰도 ${confidence}% — 일반 쇼핑/연애 분석 개방`;
     tier = 1;
   }
+
+  const goHome = () => {
+    router.push('/');
+  };
 
   return (
     <main style={{
@@ -90,80 +106,69 @@ function ResultContent() {
         </p>
       </div>
 
-      {/* NTI 진입 버튼 분기 */}
+      {/* 메인 액션 버튼 */}
       <div style={{ width: '100%', maxWidth: '360px', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-        {/* 결과 화면 상단 광고 */}
-        <div className="w-full flex justify-center mb-4 mt-2">
+        
+        {/* 광고 슬롯 (상단) */}
+        <div className="w-full flex justify-center mb-2">
           <AdSlot slotId="RESULT_TOP" mbtiType={mbtiType} />
         </div>
 
-        {tier === 0 && (
-          <button
-            onClick={() => router.push(`/?exclude=${testType}`)}
-            style={{
-              width: '100%', padding: '1rem', background: '#6366f1',
-              border: 'none', borderRadius: '10px',
-              fontSize: '0.9rem', color: '#fff', cursor: 'pointer', fontWeight: '700',
-              boxShadow: '0 4px 14px rgba(99, 102, 241, 0.3)'
-            }}
-          >
-            🔥 방금 하신 것 취향에 맞으신가요?<br />
-            다른 버전(다이나믹/프리미엄)도 해보기
-          </button>
-        )}
+        {/* [v16 추가] 블로그 상세 특징 분석 사이트로 이동 */}
+        <button
+          onClick={() => window.location.href = `https://mbti.nbtitest.com/${mbtiType.toLowerCase()}-characteristics/`}
+          style={{
+            width: '100%', padding: '1.25rem', background: '#111827',
+            border: 'none', borderRadius: '15px',
+            fontSize: 'max(1rem, 12px)', color: '#fff', cursor: 'pointer', fontWeight: '700',
+            boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
+          }}
+        >
+          📘 {mbtiType} 유형 상세 특징 분석 보고서 (블로그)
+        </button>
 
         {tier === 1 && (
-          <>
-            <button
-              onClick={() => router.push('/shopping-nti')}
-              style={{
-                width: '100%', padding: '1rem', background: '#6366f1',
-                border: 'none', borderRadius: '10px',
-                fontSize: '0.9rem', color: '#fff', cursor: 'pointer', fontWeight: '600',
-              }}
-            >
-              🛒 쇼핑 트렌드 지수 측정하기
-            </button>
-            <button
-              onClick={() => router.push(`/?exclude=${testType}`)}
-              style={{
-                width: '100%', padding: '1rem', background: '#fff',
-                border: '1px solid #e5e7eb', borderRadius: '10px',
-                fontSize: '0.9rem', color: '#6366f1', cursor: 'pointer', fontWeight: '500',
-              }}
-            >
-              (현재 {confidence}%) 신뢰도 85% 채우고 프리미엄 보상 받기
-            </button>
-          </>
-        )}
-
-        {tier === 2 && (
           <button
-            onClick={() => window.location.href = `https://mbti.nbtitest.com/${mbtiType.toLowerCase()}-characteristics/`}
+            onClick={() => router.push('/shopping-nti')}
             style={{
-              width: '100%', padding: '1rem', background: '#111827',
-              border: 'none', borderRadius: '10px',
+              width: '100%', padding: '1rem', background: '#6366f1',
+              border: 'none', borderRadius: '12px',
               fontSize: '0.9rem', color: '#fff', cursor: 'pointer', fontWeight: '600',
             }}
           >
-            ✨ 내 성격 특징 완벽 분석 리포트 보러가기
+            🛒 나의 쇼핑 트렌드 지수 확인하기
           </button>
         )}
 
-        {/* 다시 테스트 하기 버튼 (홈으로 이동) */}
         <button
-          onClick={() => router.push('/')}
+          onClick={goHome}
           style={{
-            width: '100%', padding: '1rem', background: '#fff',
-            border: '1px solid #e5e7eb', borderRadius: '10px',
-            fontSize: '0.9rem', color: '#9ca3af', cursor: 'pointer', fontWeight: '500',
+            width: '100%', padding: '1.1rem', background: '#fff',
+            border: '2px solid #6366f1', borderRadius: '12px',
+            fontSize: '0.95rem', color: '#6366f1', cursor: 'pointer', fontWeight: '800',
+            marginTop: '0.5rem'
           }}
         >
-          ↻ 처음부터 다시 테스트 하기
+          🔥 다른 버전 테스트하러 가기
         </button>
 
-        {/* 결과 화면 하단 광고 */}
-        <div className="w-full flex justify-center mt-4">
+        <button
+          onClick={() => {
+            if (typeof window !== 'undefined') localStorage.removeItem('completed_nbti_tests');
+            router.push('/');
+          }}
+          style={{
+            width: '100%', padding: '0.8rem', background: 'transparent',
+            border: 'none', borderRadius: '10px',
+            fontSize: '0.8rem', color: '#9ca3af', cursor: 'pointer', fontWeight: '500',
+            textDecoration: 'underline'
+          }}
+        >
+          ↻ 모든 내역 삭제하고 처음부터 다시 하기
+        </button>
+
+        {/* 광고 슬롯 (하단) */}
+        <div className="w-full flex justify-center mt-2">
           <AdSlot slotId="RESULT_BOTTOM" mbtiType={mbtiType} />
         </div>
       </div>
