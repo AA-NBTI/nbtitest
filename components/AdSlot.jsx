@@ -19,7 +19,7 @@ export function AdSlot({ slotId, mbtiType = 'all' }) {
   useEffect(() => {
     async function fetchAd() {
       try {
-        const res = await fetch(`/api/ads?placement=${slotId}`);
+        const res = await fetch(`/api/ads?placement=${slotId}`, { cache: 'no-store' });
         const allAds = await res.json();
         
         const possibleAds = Array.isArray(allAds) ? allAds.filter(a => 

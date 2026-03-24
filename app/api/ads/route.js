@@ -1,6 +1,6 @@
 import { getAdminClient } from '@/lib/supabase';
 
-export const revalidate = 3600; // 1시간 캐시 - 화면 로딩속도 극대화
+export const revalidate = 0; // 실시간 반영을 위해 캐시 제거
 
 export async function GET(req) {
   try {
