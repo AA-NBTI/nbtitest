@@ -16,8 +16,6 @@ export function AdSlot({ slotId, mbtiType = 'all' }) {
   const [ad, setAd] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  const [showToast, setShowToast] = useState(false);
-
   useEffect(() => {
     async function fetchAd() {
       try {
@@ -65,69 +63,38 @@ export function AdSlot({ slotId, mbtiType = 'all' }) {
     fetchAd();
   }, [slotId, mbtiType]);
 
-  const handleAdClick = (e) => {
-    if (!ad?.link_url) return;
-    e.preventDefault();
-    
-    // 1. 새 탭에서 광고 열기
-    const newWindow = window.open(ad.link_url, '_blank', 'noopener,noreferrer');
-    
-    // 2. 현재 창(테스트 화면)에 포커스 유지 시도
-    if (newWindow) {
-      window.focus();
-    }
-    
-    // 3. 사용자 안내 토스트 표시 (테스트 복귀 유도)
-    setShowToast(true);
-    setTimeout(() => setShowToast(false), 3000);
-
-    // 4. 클릭 분석 (필요 시)
-    try {
-      fetch(`/api/ads/click?id=${ad.ad_id}`, { method: 'POST' }).catch(() => {});
-    } catch(e) {}
-  };
-
   if (loading) return <div className="w-full h-24 bg-gray-50 animate-pulse rounded-2xl border border-dashed border-gray-200" />;
   if (!ad) return null;
-
-  // 알림 토스트 UI
-  const Toast = () => (
-    <div className={`fixed bottom-24 left-1/2 -translate-x-1/2 z-[10000] bg-slate-900/90 backdrop-blur-md text-white px-6 py-3 rounded-2xl shadow-2xl transition-all duration-500 flex items-center gap-3 border border-white/10 ${showToast ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'}`}>
-      <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse" />
-      <span className="text-xs font-black tracking-tight whitespace-nowrap">광고가 연결되었습니다. 테스트를 계속 진행해 주세요!</span>
-    </div>
-  );
 
   // MAIN_TOP: 상단 고정 스티키 배너
   if (slotId === 'MAIN_TOP') {
     return (
-      <>
-        <Toast />
-        <div
-          onClick={handleAdClick}
-          className="flex w-full items-center justify-center overflow-hidden bg-white relative group cursor-pointer"
-          style={{ height: '100px', maxWidth: '375px', margin: '0 auto' }}
-        >
-          {ad.banner_img_url ? (
-            <img
-              src={ad.banner_img_url}
-              alt={ad.brand_name || 'Ad'}
-              className="w-full h-full object-cover group-hover:opacity-90 transition-opacity"
-              style={{ display: 'block' }}
-            />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center gap-3 bg-indigo-600 px-4">
-              <span className="text-white font-black text-sm truncate">{ad.title}</span>
-              <span className="shrink-0 text-indigo-200 text-xs font-bold border border-indigo-400 px-2 py-0.5 rounded-full">알아보기 →</span>
-            </div>
-          )}
-          {!ad.isFallback && (
-            <div className="absolute top-0 right-0 bg-slate-900/50 text-[7px] font-black text-white px-1.5 py-[2px] uppercase tracking-widest">
-              AD
-            </div>
-          )}
-        </div>
-      </>
+      <a
+        href={ad.link_url}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="flex w-full items-center justify-center overflow-hidden bg-white relative group cursor-pointer"
+        style={{ height: '100px', maxWidth: '375px', margin: '0 auto' }}
+      >
+        {ad.banner_img_url ? (
+          <img
+            src={ad.banner_img_url}
+            alt={ad.brand_name || 'Ad'}
+            className="w-full h-full object-cover group-hover:opacity-90 transition-opacity"
+            style={{ display: 'block' }}
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center gap-3 bg-indigo-600 px-4">
+            <span className="text-white font-black text-sm truncate">{ad.title}</span>
+            <span className="shrink-0 text-indigo-200 text-xs font-bold border border-indigo-400 px-2 py-0.5 rounded-full">알아보기 →</span>
+          </div>
+        )}
+        {!ad.isFallback && (
+          <div className="absolute top-0 right-0 bg-slate-900/50 text-[7px] font-black text-white px-1.5 py-[2px] uppercase tracking-widest">
+            AD
+          </div>
+        )}
+      </a>
     );
   }
 
@@ -135,11 +102,12 @@ export function AdSlot({ slotId, mbtiType = 'all' }) {
   const containerAspect = isResultSlot ? 'aspect-[3.2/1]' : 'aspect-[2/1]';
 
   return (
-    <>
-      <Toast />
-      <div 
-        onClick={handleAdClick}
-        className={`w-full cursor-pointer ${isResultSlot ? 'max-w-[320px] rounded-2xl' : 'max-w-[400px] mt-8 mb-4 rounded-3xl'} overflow-hidden border border-slate-200 bg-white shadow-sm hover:shadow-md transition-all group relative`}
+    <div className={`w-full ${isResultSlot ? 'max-w-[320px] rounded-2xl' : 'max-w-[400px] mt-8 mb-4 rounded-3xl'} overflow-hidden border border-slate-200 bg-white shadow-sm hover:shadow-md transition-all group relative`}>
+      <a 
+        href={ad.link_url} 
+        target="_blank" 
+        rel="noopener noreferrer"
+        className="block relative"
       >
         <div className="absolute top-1 right-1 z-10 bg-slate-900/40 backdrop-blur-md text-[8px] font-black text-white px-2 py-[2px] rounded-sm uppercase tracking-tighter shadow-sm">
           Ad
@@ -169,7 +137,7 @@ export function AdSlot({ slotId, mbtiType = 'all' }) {
              Open <ExternalLink size={10} />
           </div>
         </div>
-      </div>
-    </>
+      </a>
+    </div>
   );
 }
