@@ -44,7 +44,7 @@ export default function LandingPage() {
             Next Behavioral Trend Indicator
           </p>
           <h1 style={{ fontSize: 'clamp(2.5rem, 8vw, 4rem)', fontWeight: '800', color: '#111827', letterSpacing: '-0.03em', margin: 0 }}>
-            NBTI
+            NBTI 테스트
           </h1>
           <p style={{ marginTop: '1rem', fontSize: '1rem', color: '#6b7280' }}>
             당신의 성향을 정확하게 측정합니다

@@ -114,61 +114,50 @@ function ResultContent() {
           <AdSlot slotId="RESULT_TOP" mbtiType={mbtiType} />
         </div>
 
-        {/* [v16 추가] 블로그 상세 특징 분석 사이트로 이동 */}
+        {/* 1. NBTI 유형 분석 (블로그 연동) */}
         <button
           onClick={() => window.location.href = `https://mbti.nbtitest.com/${mbtiType.toLowerCase()}-characteristics/`}
           style={{
             width: '100%', padding: '1.25rem', background: '#111827',
             border: 'none', borderRadius: '15px',
-            fontSize: 'max(1rem, 12px)', color: '#fff', cursor: 'pointer', fontWeight: '700',
-            boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
+            fontSize: '1.1rem', color: '#fff', cursor: 'pointer', fontWeight: '800',
+            boxShadow: '0 8px 15px -3px rgba(0, 0, 0, 0.1)',
           }}
         >
-          📘 {mbtiType} 유형 상세 특징 분석 보고서 (블로그)
+          NBTI 유형 분석
         </button>
 
-        {tier === 1 && (
-          <button
-            onClick={() => router.push('/shopping-nti')}
-            style={{
-              width: '100%', padding: '1rem', background: '#6366f1',
-              border: 'none', borderRadius: '12px',
-              fontSize: '0.9rem', color: '#fff', cursor: 'pointer', fontWeight: '600',
-            }}
-          >
-            🛒 나의 쇼핑 트렌드 지수 확인하기
-          </button>
-        )}
-
+        {/* 2. 다른 버전 테스트 (홈으로 이동하여 완료된 것 제외 목록 보기) */}
         <button
           onClick={goHome}
           style={{
-            width: '100%', padding: '1.1rem', background: '#fff',
-            border: '2px solid #6366f1', borderRadius: '12px',
-            fontSize: '0.95rem', color: '#6366f1', cursor: 'pointer', fontWeight: '800',
-            marginTop: '0.5rem'
+            width: '100%', padding: '1.1rem', background: '#6366f1',
+            border: 'none', borderRadius: '12px',
+            fontSize: '1.05rem', color: '#fff', cursor: 'pointer', fontWeight: '700',
+            marginTop: '0.25rem'
           }}
         >
-          🔥 다른 버전 테스트하러 가기
+          다른 버전 테스트
         </button>
 
+        {/* 3. 처음부터 다시하기 (로컬스토리지 초기화 포함) */}
         <button
           onClick={() => {
             if (typeof window !== 'undefined') localStorage.removeItem('completed_nbti_tests');
             router.push('/');
           }}
           style={{
-            width: '100%', padding: '0.8rem', background: 'transparent',
-            border: 'none', borderRadius: '10px',
-            fontSize: '0.8rem', color: '#9ca3af', cursor: 'pointer', fontWeight: '500',
-            textDecoration: 'underline'
+            width: '100%', padding: '0.9rem', background: '#fff',
+            border: '1px solid #e5e7eb', borderRadius: '12px',
+            fontSize: '0.9rem', color: '#9ca3af', cursor: 'pointer', fontWeight: '600',
+            marginTop: '0.25rem'
           }}
         >
-          ↻ 모든 내역 삭제하고 처음부터 다시 하기
+          처음부터 다시 하기
         </button>
 
         {/* 광고 슬롯 (하단) */}
-        <div className="w-full flex justify-center mt-2">
+        <div className="w-full flex justify-center mt-4">
           <AdSlot slotId="RESULT_BOTTOM" mbtiType={mbtiType} />
         </div>
       </div>
