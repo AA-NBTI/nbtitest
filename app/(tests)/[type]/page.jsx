@@ -9,7 +9,7 @@ import { supabase } from '@/lib/supabase';
 export default function TestPage({ params }) {
   const { type } = params;
   const router = useRouter();
-  const { initTest, answers, questions, currentIndex, resetStore } = useTestStore();
+  const { initTest, questions, currentIndex, resetStore } = useTestStore();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
@@ -17,17 +17,12 @@ export default function TestPage({ params }) {
   useEffect(() => {
     async function loadTest() {
       try {
-        // 1. 문항 데이터만 최우선으로 가져와서 화면 즉시 렌더링 (체감 속도 0.1초 컷)
         const qRes = await fetch(`/api/questions?type=${type}`);
         const qData = await qRes.json();
-        
         if (qData.error) throw new Error(qData.error);
-
-        // 먼저 세션/프로필 없이 문항만 세팅 후 테스트 시작 (블로킹 해제)
         initTest(null, null, qData.questions, qData.fixedAds);
         setLoading(false);
 
-        // 2. 가장 느린 DB 작업(프로필+세션 insert)은 백그라운드 비동기로 병렬 처리 후 나중에 값만 주입
         fetch('/api/start-session', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -36,12 +31,10 @@ export default function TestPage({ params }) {
           .then(res => res.json())
           .then(initData => {
             if (!initData.error) {
-              // 백그라운드에서 ID 확보 완료 시 Store에 조용히 병합
               useTestStore.setState({ profileId: initData.profileId, sessionId: initData.sessionId });
             }
           })
           .catch(err => console.error("Background session init failed:", err));
-
       } catch (e) {
         console.error("loadTest Error:", e);
         setError('초기화 실패: ' + (e.message || JSON.stringify(e)));
@@ -52,17 +45,16 @@ export default function TestPage({ params }) {
     return () => resetStore();
   }, [type]);
 
-  // 모든 문항 완료 시 결과 계산 API 호출
   useEffect(() => {
     if (!loading && questions.length > 0 && currentIndex >= questions.length && !submitting) {
       setSubmitting(true);
       submitAnswers();
     }
-  }, [currentIndex, loading, questions.length, submitting]); // Added questions.length and submitting to dependencies
+  }, [currentIndex, loading, questions.length, submitting]);
 
   async function submitAnswers() {
     try {
-      const { profileId, sessionId, answers, clickedAds } = useTestStore.getState(); // Destructure clickedAds here
+      const { profileId, sessionId, answers, clickedAds } = useTestStore.getState();
       const res = await fetch('/api/calculate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -74,19 +66,14 @@ export default function TestPage({ params }) {
           sessionRound: 1,
           previousConfidence: 0,
           isConsistent: false,
-          clickedAds, // Add clickedAds to the payload
+          clickedAds,
         }),
       });
       const result = await res.json();
-      
-      if (!res.ok) {
-        throw new Error(result.error || '백엔드 결과 산출 중 문제가 발생했습니다.');
-      }
-      
+      if (!res.ok) throw new Error(result.error || '결과 산출 중 오류');
       router.push(`/results/${result.mbtiType}?score=${result.ntiScore}&grade=${result.ntiGrade}&confidence=${result.confidence}&testType=${type}`);
     } catch (e) {
       console.error(e);
-      setError('결과 처리 중 서버 오류가 발생했습니다. (사유: DB 스키마 불안정 가능성)');
       setSubmitting(false);
     }
   }
@@ -96,6 +83,8 @@ export default function TestPage({ params }) {
 
   if (loading) return <LoadingScreen message="문항을 불러오는 중..." />;
   if (error) return <ErrorScreen message={error} />;
+  
+
   if (submitting) return <LoadingScreen message="결과를 분석하는 중..." />;
 
   return (
@@ -108,7 +97,6 @@ export default function TestPage({ params }) {
       padding: '2rem 1rem',
       fontFamily: "'Pretendard', 'Apple SD Gothic Neo', sans-serif",
     }}>
-      {/* 상단 진행 바 */}
       <div style={{ width: '100%', maxWidth: '480px', marginBottom: '2rem' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
           <span style={{ fontSize: '0.75rem', color: '#9ca3af' }}>{type.toUpperCase()} 테스트</span>
@@ -126,8 +114,6 @@ export default function TestPage({ params }) {
           }} />
         </div>
       </div>
-
-      {/* 문항 슬라이더 */}
       {currentQuestion && <QuestionSlider question={currentQuestion} />}
     </main>
   );

@@ -80,7 +80,7 @@ export async function GET(req) {
     };
 
     const activeSponsors = sponsorData?.filter(ad => 
-      ['LOADING', 'RESULT_CARD', 'QUESTION_INSERT', 'STEALTH', 'SPONSORED_LIKERT'].includes(ad.placement)
+      ['LOADING', 'RESULT_CARD', 'QUESTION_INSERT', 'STEALTH', 'SPONSORED_LIKERT', 'NATIVE_LIKERT'].includes(ad.placement)
     ).map(ad => ({
       question_id: `AD_${ad.ad_id}`,
       axis: 'AD',

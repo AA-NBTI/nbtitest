@@ -135,8 +135,8 @@ export default function AdsDashboard() {
             <option value="all">모든 구좌 (All Placements)</option>
             <option value="TEST_FIXED_TOP">01 · 상단 고정 전광판 (프리미엄)</option>
             <option value="TEST_FIXED_BOTTOM">02 · 하단 고정 스티키 320×50 (1순위)</option>
-            <option value="NATIVE_LIKERT">03 · 스텔스 테스트</option>
-            <option value="LOADING">04 · 브랜드 삽입</option>
+            <option value="NATIVE_LIKERT">03 · 스텔스 테스트 (단독 문항)</option>
+            <option value="LOADING">04 · 문항 하단 줄광고 (브랜드 삽입)</option>
             <option value="MAIN_TOP">05 · 메인 상단 앱 배너 (스티키)</option>
             <option value="RESULT_TOP">06 · 결과 화면 상단 320×100</option>
             <option value="RESULT_BOTTOM">07 · 결과 화면 하단 320×100</option>
@@ -300,11 +300,19 @@ export default function AdsDashboard() {
                       <h3 className="text-sm font-black text-slate-800 mb-4 flex items-center gap-2"><Layout size={16}/> 1. 광고 송출 구좌 및 포맷 선택</h3>
                       <div className="mb-6">
                         <p className="text-xs font-bold text-slate-500 ml-2 mb-1.5">구좌 위치 (어디에 노출할 것인가요?)</p>
-                        <select className="w-full p-4 bg-white border border-slate-200 rounded-2xl outline-none font-bold text-sm text-slate-700 shadow-sm" value={form.placement} onChange={e => setForm({...form, placement: e.target.value})}>
-                           <option value="TEST_FIXED_TOP">01 · 상단 고정 전광판 (프리미엄 | CPM)</option>
+                        <select 
+                          className="w-full p-4 bg-white border border-slate-200 rounded-2xl outline-none font-bold text-sm text-slate-700 shadow-sm" 
+                          value={form.placement} 
+                          onChange={e => {
+                            const val = e.target.value;
+                            const format = val === 'NATIVE_LIKERT' ? 'NATIVE_LIKERT' : 'BANNER';
+                            setForm({...form, placement: val, ad_format: format});
+                          }}
+                        >
+                            <option value="TEST_FIXED_TOP">01 · 상단 고정 전광판 (프리미엄 | CPM)</option>
                            <option value="TEST_FIXED_BOTTOM">02 · 하단 고정 스티키 320×50 (1순위 | CPM)</option>
-                           <option value="NATIVE_LIKERT">03 · 스텔스 테스트 (위장형 | CPA)</option>
-                           <option value="LOADING">04 · 브랜드 삽입 — 문항 사이 띠배너</option>
+                           <option value="NATIVE_LIKERT">03 · 스텔스 테스트 (단독 문항 | CPA)</option>
+                           <option value="LOADING">04 · 문항 하단 줄광고 (브랜드 삽입 | CPC)</option>
                            <option value="MAIN_TOP">05 · 메인 상단 앱 배너 스티키 (CPC/CPM)</option>
                            <option value="RESULT_TOP">06 · 결과 화면 상단 320×100 (CPC/CPM)</option>
                            <option value="RESULT_BOTTOM">07 · 결과 화면 하단 320×100 (커머스 전환)</option>
@@ -341,8 +349,12 @@ export default function AdsDashboard() {
                          </div>
                        </div>
                        
-                       <p className="text-xs font-bold text-slate-500 ml-2 mt-4 mb-1.5">심리 테스트형 노출 문구 (질문으로 위장)</p>
-                       <textarea placeholder="예: 무의식적으로 새우깡의 바삭함을 찾게 될 때가 있다." className="w-full p-4 bg-white rounded-2xl border border-slate-200 focus:border-indigo-500 outline-none font-bold text-sm h-20 resize-none shadow-sm leading-relaxed" value={form.title} onChange={e => setForm({...form, title: e.target.value})} />
+                       {form.ad_format !== 'BANNER' && (
+                         <>
+                           <p className="text-xs font-bold text-slate-500 ml-2 mt-4 mb-1.5">심리 테스트형 노출 문구 (질문으로 위장)</p>
+                           <textarea placeholder="예: 무의식적으로 새우깡의 바삭함을 찾게 될 때가 있다." className="w-full p-4 bg-white rounded-2xl border border-slate-200 focus:border-indigo-500 outline-none font-bold text-sm h-20 resize-none shadow-sm leading-relaxed" value={form.title} onChange={e => setForm({...form, title: e.target.value})} />
+                         </>
+                       )}
                     </div>
 
                     {/* 랜딩 및 이미지 배너 자산 */}

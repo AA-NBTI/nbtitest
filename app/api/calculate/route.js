@@ -1,4 +1,4 @@
-import { getAdminClient } from '@/lib/supabase';
+import { getAdminClient } from '@/lib/supabase-admin';
 
 /**
  * 안프로 요구사항: 서버사이드 결과 연산 엔진
@@ -9,7 +9,7 @@ export async function POST(req) {
   try {
     const supabase = getAdminClient();
     const body = await req.json();
-    const { answers, sessionId, testType = 'basic', clickedAds = [] } = body;
+    const { answers, sessionId, testType = 'basic', clickedAds = [], demoInfo } = body;
 
     // 1. 유효성 검사
     if (!answers) return Response.json({ error: "No Data" }, { status: 400 });
@@ -91,7 +91,10 @@ export async function POST(req) {
         score_tf: sums.TF,
         score_jp: sums.JP,
         nti_score: computedNtiScore, // 동적 계산
-        nti_grade: computedGrade
+        nti_grade: computedGrade,
+        gender: demoInfo?.gender,
+        age_group: demoInfo?.age,
+        region: demoInfo?.region
       })
     );
 

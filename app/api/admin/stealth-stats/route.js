@@ -6,57 +6,55 @@ import { getAdminClient } from '@/lib/supabase';
  */
 
 export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export async function GET() {
   const supabase = getAdminClient();
 
   try {
-    // 1. 스폰서 광고(스텔스 문항) 목록 가져오기
+    // 1. 등록된 모든 광고 목록 가져오기 (캠페인 관리와 즉시 동기화)
     const { data: ads } = await supabase
       .from('nbti_internal_ads')
-      .select('ad_id, brand_name, title');
-
-    // 2. 전체 스텔스 응답과 결과(MBTI) 조인 데이터 가져오기 (성능 이슈 방지를 위해 최근 5000건만 분석)
-    // nbti_responses 테이블의 is_ad 필터 활용
-    const { data: rawStats, error } = await supabase
-      .from('nbti_responses')
-      .select(`
-        answer_value,
-        nbti_results!inner ( mbti_type ),
-        question_id
-      `)
-      .eq('is_ad', true)
+      .select('ad_id, brand_name, title, ad_format')
       .order('created_at', { ascending: false })
-      .limit(5000);
+      .limit(100);
 
-    if (error) throw error;
+    // 2. 답변(responses)과 결과(results)를 각각 가져오기 (수동 Join)
+    const [responsesRes, resultsRes] = await Promise.all([
+      supabase.from('nbti_responses').select('answer_value, question_id, session_id').eq('is_ad', true),
+      supabase.from('nbti_results').select('session_id, mbti_type')
+    ]);
 
-    // 3. 데이터 가공 (문항별 -> 점수별 -> MBTI별 카운팅)
+    const responses = responsesRes.data || [];
+    const results = resultsRes.data || [];
+
+    // 세션별 MBTI 맵 생성
+    const result_map = {};
+    results.forEach(r => { result_map[r.session_id] = r.mbti_type; });
+
+    // 3. 데이터 가공 (모든 광고가 리스트에 보이도록 초기화)
     const stats = {};
 
     ads.forEach(ad => {
       const qId = `AD_${ad.ad_id}`;
-      // 문항별 초기 구조
       stats[qId] = {
         ad_id: ad.ad_id,
-        brand_name: ad.brand_name,
-        title: ad.title,
+        brand_name: ad.brand_name || '미등록 광고',
+        title: ad.title || '제목 없음',
+        ad_format: ad.ad_format,
         total_count: 0,
-        distribution: {
-          1: {}, 2: {}, 3: {}, 4: {}, 5: {}, 6: {}, 7: {} // 7점 척도
-        }
+        distribution: { 1: {}, 2: {}, 3: {}, 4: {}, 5: {}, 6: {}, 7: {} }
       };
     });
 
-    // 로우 데이터를 순회하며 카운팅
-    rawStats.forEach(row => {
+    // 응답 데이터를 순회하며 MBTI 매칭 및 집계
+    responses.forEach(row => {
       const qId = row.question_id;
       const score = row.answer_value;
-      const mbti = row.nbti_results?.mbti_type;
+      const mbti = result_map[row.session_id] || 'UNKNOWN';
 
       if (stats[qId] && score >= 1 && score <= 7) {
         stats[qId].total_count++;
-        // MBTI별 가산
         if (!stats[qId].distribution[score][mbti]) {
           stats[qId].distribution[score][mbti] = 0;
         }

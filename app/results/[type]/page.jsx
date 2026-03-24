@@ -36,7 +36,16 @@ function ResultContent() {
   const confidence = parseInt(searchParams.get('confidence') || '0');
   const testType = searchParams.get('testType') || 'basic';
 
+  const [stats, setStats] = useState(null);
   const desc = MBTI_DESC[mbtiType] || '나만의 고유한 성향 유형';
+
+  // 실시간 통계 데이터 로드
+  useEffect(() => {
+    fetch('/api/stats/summary')
+      .then(res => res.json())
+      .then(data => setStats(data))
+      .catch(err => console.error("Stats load failed:", err));
+  }, []);
 
   // [고도화] 테스트 완료 내역을 로컬 스토리지에 누적 저장
   useEffect(() => {
@@ -78,15 +87,49 @@ function ResultContent() {
     }}>
 
       {/* MBTI 결과 */}
-      <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
+      <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
         <p style={{ fontSize: '0.75rem', letterSpacing: '0.2em', color: '#9ca3af', marginBottom: '0.5rem', textTransform: 'uppercase' }}>
           당신의 유형
         </p>
-        <h1 style={{ fontSize: 'clamp(3rem, 12vw, 5rem)', fontWeight: '800', color: '#111827', letterSpacing: '-0.03em', margin: 0 }}>
+        <h1 style={{ fontSize: 'clamp(2.5rem, 10vw, 4rem)', fontWeight: '800', color: '#111827', letterSpacing: '-0.03em', margin: 0 }}>
           {mbtiType}
         </h1>
-        <p style={{ marginTop: '0.75rem', fontSize: '0.95rem', color: '#6b7280' }}>{desc}</p>
+        <p style={{ marginTop: '0.5rem', fontSize: '0.9rem', color: '#6b7280' }}>{desc}</p>
       </div>
+
+      {/* 실시간 트렌드 섹션 (박팀장님 추천 볼거리) */}
+      {stats && stats.total > 0 && (
+        <div style={{
+          width: '100%', maxWidth: '360px', background: '#fff', borderRadius: '24px',
+          padding: '1.5rem', marginBottom: '1.5rem', border: '1px solid #f3f4f6',
+          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '1rem' }}>
+            <span style={{ fontSize: '0.9rem', fontWeight: '800', color: '#6366f1' }}>REAL-TIME</span>
+            <span style={{ fontSize: '0.8rem', fontWeight: '800', color: '#111827' }}>참여자 트렌드</span>
+            <span style={{ padding: '2px 6px', background: '#eef2ff', borderRadius: '4px', fontSize: '10px', fontWeight: '700', color: '#6366f1' }}>N={stats.total}</span>
+          </div>
+          
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+            <div style={{ borderLeft: '3px solid #6366f1', paddingLeft: '10px' }}>
+              <p style={{ fontSize: '0.65rem', fontWeight: 'bold', color: '#9ca3af', marginBottom: '4px' }}>주요 성별</p>
+              <h5 style={{ fontSize: '1rem', fontWeight: '800', color: '#111827' }}>
+                {Object.entries(stats.gender).sort((a,b)=>b[1]-a[1])[0]?.[0] || '분석 중'}
+              </h5>
+            </div>
+            <div style={{ borderLeft: '3px solid #10b981', paddingLeft: '10px' }}>
+              <p style={{ fontSize: '0.65rem', fontWeight: 'bold', color: '#9ca3af', marginBottom: '4px' }}>핵심 연령대</p>
+              <h5 style={{ fontSize: '1rem', fontWeight: '800', color: '#111827' }}>
+                {Object.entries(stats.age).sort((a,b)=>b[1]-a[1])[0]?.[0] || '분석 중'}
+              </h5>
+            </div>
+          </div>
+
+          <p style={{ fontSize: '0.7rem', color: '#9ca3af', marginTop: '1rem', fontStyle: 'italic' }}>
+            "현재 {Object.entries(stats.region).sort((a,b)=>b[1]-a[1])[0]?.[0] || '전국'} 지역에서 가장 활발히 참여 중입니다!"
+          </p>
+        </div>
+      )}
 
       {/* 신뢰도 바 */}
       <div style={{ width: '100%', maxWidth: '360px', marginBottom: '2rem' }}>
@@ -101,9 +144,6 @@ function ResultContent() {
             borderRadius: '999px', transition: 'width 0.6s ease',
           }} />
         </div>
-        <p style={{ fontSize: '0.75rem', color: '#9ca3af', marginTop: '0.5rem', textAlign: 'center' }}>
-          {ntiMessage}
-        </p>
       </div>
 
       {/* 메인 액션 버튼 */}

@@ -63,16 +63,23 @@ export function AdSlot({ slotId, mbtiType = 'all' }) {
     fetchAd();
   }, [slotId, mbtiType]);
 
+  const handleAdClick = (e) => {
+    // 기본 동작(링크 이동)을 막고 커스텀 핸들링 (필요 시)
+    // recordAdClick이 있다면 여기서 호출
+    console.log('Ad clicked:', ad.brand_name);
+  };
+
   if (loading) return <div className="w-full h-24 bg-gray-50 animate-pulse rounded-2xl border border-dashed border-gray-200" />;
   if (!ad) return null;
 
-  // MAIN_TOP: 상단 고정 스티키 배너
+  // 05. MAIN_TOP: 상단 고정 스티키 배너
   if (slotId === 'MAIN_TOP') {
     return (
       <a
         href={ad.link_url}
         target="_blank"
         rel="noopener noreferrer"
+        onClick={handleAdClick}
         className="flex w-full items-center justify-center overflow-hidden bg-white relative group cursor-pointer"
         style={{ height: '100px', maxWidth: '375px', margin: '0 auto' }}
       >
@@ -107,6 +114,7 @@ export function AdSlot({ slotId, mbtiType = 'all' }) {
         href={ad.link_url} 
         target="_blank" 
         rel="noopener noreferrer"
+        onClick={handleAdClick}
         className="block relative"
       >
         <div className="absolute top-1 right-1 z-10 bg-slate-900/40 backdrop-blur-md text-[8px] font-black text-white px-2 py-[2px] rounded-sm uppercase tracking-tighter shadow-sm">
@@ -134,7 +142,7 @@ export function AdSlot({ slotId, mbtiType = 'all' }) {
             <span className="block text-[11px] font-bold text-slate-700 truncate">{ad.title}</span>
           </div>
           <div className="flex items-center gap-1 bg-slate-50 text-indigo-600 text-[10px] font-black px-2 py-1.5 rounded-lg group-hover:bg-indigo-50 transition-colors shadow-sm border border-slate-100">
-             Open <ExternalLink size={10} />
+             열기 <ExternalLink size={10} />
           </div>
         </div>
       </a>

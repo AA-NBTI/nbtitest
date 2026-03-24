@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 // [수정] 내부 create 삭제 및 외부 스토어 임포트
 import { useTestStore } from '@/store/useTestStore';
@@ -19,9 +19,36 @@ const LIKERT_OPTIONS = [
 ];
 
 export function QuestionSlider() {
-  const { questions, currentIndex, setAnswer, isTransitioning, setTransitioning, nextQuestion, recordAdClick, fixedAds } = useTestStore();
+  const { questions, currentIndex, setAnswer, isTransitioning, setTransitioning, nextQuestion, recordAdClick, fixedAds, setCurrentIndex } = useTestStore();
   const [startTime, setStartTime] = useState(Date.now());
   const [selectedValue, setSelectedValue] = useState(null);
+  const scrollRef = useRef(null); // Added scrollRef
+
+  // 광고 클릭 후 복환성을 위한 상태 보존 (LocalStorage)
+  useEffect(() => {
+    const testType = 'default'; // Assuming a default test type or retrieve from context/props if available
+    const saved = localStorage.getItem(`nbti_progress_${testType}`);
+    if (saved) {
+      const idx = parseInt(saved, 10);
+      if (idx > 0 && idx < questions.length) {
+        setCurrentIndex(idx); // Restore currentIndex from store
+      }
+    }
+  }, [questions.length, setCurrentIndex]); // Depend on questions.length and setCurrentIndex
+
+  useEffect(() => {
+    const testType = 'default'; // Assuming a default test type or retrieve from context/props if available
+    localStorage.setItem(`nbti_progress_${testType}`, currentIndex.toString()); // Save currentIndex from store
+    const container = scrollRef.current;
+    if (container) {
+      // This part seems to be for a horizontal scroll, but the current layout is vertical.
+      // Keeping it as per instruction, but it might not have a visual effect without a scrollable container.
+      container.scrollTo({
+        left: currentIndex * container.offsetWidth,
+        behavior: 'smooth'
+      });
+    }
+  }, [currentIndex]); // Depend on currentIndex
 
   const question = questions[currentIndex];
 

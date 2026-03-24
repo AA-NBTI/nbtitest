@@ -43,5 +43,7 @@ export const useTestStore = create((set, get) => ({
     isTransitioning: false 
   })),
 
+  setCurrentIndex: (idx) => set({ currentIndex: idx }),
+
   resetStore: () => set({ currentIndex: 0, answers: [], isTransitioning: false })
 }));
