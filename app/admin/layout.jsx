@@ -12,6 +12,7 @@ export default function AdminLayout({ children }) {
     { name: '광고 퍼포먼스 통계', path: '/admin/stats', icon: LayoutDashboard },
     { name: '제휴 파트너사 목록', path: '/admin/brands', icon: Users },
     { name: '스폰서 캠페인 관리', path: '/admin/ads', icon: Megaphone },
+    { name: '스텔스 분석 (B2B)', path: '/admin/stealth-analysis', icon: BarChart3 },
     { name: '광고 상품 구성', path: '/admin/ad-products', icon: BookOpen }
   ];
 

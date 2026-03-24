@@ -79,7 +79,9 @@ export async function GET(req) {
       }
     };
 
-    const activeSponsors = sponsorData?.filter(ad => ad.placement === 'LOADING' || ad.placement === 'RESULT_CARD').map(ad => ({
+    const activeSponsors = sponsorData?.filter(ad => 
+      ['LOADING', 'RESULT_CARD', 'QUESTION_INSERT', 'STEALTH', 'SPONSORED_LIKERT'].includes(ad.placement)
+    ).map(ad => ({
       question_id: `AD_${ad.ad_id}`,
       axis: 'AD',
       polarity: 1,
