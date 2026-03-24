@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter, useSearchParams, useParams } from 'next/navigation';
-import { Suspense } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import { AdSlot } from '@/components/AdSlot';
 
 const MBTI_DESC = {
