@@ -9,32 +9,36 @@ export async function GET(req) {
   try {
     const supabase = getAdminClient();
 
-    // 1. 문항 뼈대와 문항 텍스트(현재 버전)를 조인하여 가져오기
-    let query = supabase
-      .from('nbti_questions')
-      .select(`
-        question_id, axis, polarity,
-        nbti_question_versions!inner (id, content, is_current)
-      `)
-      .eq('nbti_question_versions.is_current', true)
-      .limit(50); // 성능 최적화: 불필요한 전체 DB 덤프 방지
+    // [최적화] 문항과 광고를 동시에 병렬 호출 (응답 대기 시간 1/2로 단축)
+    const [qRes, sRes] = await Promise.all([
+      supabase
+        .from('nbti_questions')
+        .select(`
+          question_id, axis, polarity,
+          nbti_question_versions!inner (id, content, is_current)
+        `)
+        .eq('nbti_question_versions.is_current', true)
+        .eq('test_type', type !== 'dynamic' ? type : 'basic')
+        .limit(30),
+      supabase
+        .from('nbti_internal_ads')
+        .select('ad_id, title, brand_name, target_test, link_url, banner_img_url, ad_format, placement')
+        .eq('is_active', true)
+        .or(`target_test.eq.all,target_test.eq.${type}`)
+        .limit(20)
+    ]);
 
-    if (type !== 'dynamic') {
-      query = query.eq('test_type', type);
-    }
+    const { data: qData, error: qError } = qRes;
+    const { data: sponsorData, error: sponsorError } = sRes;
 
-    const { data: qData, error } = await query;
-
-    if (error) {
-      console.error('Supabase Query Error:', error);
-      throw error;
-    }
+    if (qError) throw qError;
+    if (sponsorError) console.error("SPONSOR_DB_ERROR:", sponsorError);
 
     if (!qData || qData.length === 0) {
       return Response.json({ questions: [] });
     }
 
-    // 평탄화 완료된 array
+    // 데이터 가공 로직
     let questionsList = qData.map(q => ({
       question_id: q.question_id,
       axis: q.axis,
@@ -51,14 +55,6 @@ export async function GET(req) {
     }
 
     let questions = questionsList;
-
-    // 3. 광고 데이터 (Ad Slot) 실제 DB에서 동적 Fetch
-    const { data: sponsorData, error: sponsorError } = await supabase
-      .from('nbti_internal_ads')
-      .select('ad_id, title, brand_name, target_test, link_url, banner_img_url, ad_format, placement')
-      .eq('is_active', true)
-      .or(`target_test.eq.all,target_test.eq.${type}`)
-      .limit(100);
       
     if (sponsorError) console.error("SPONSOR_DB_ERROR:", sponsorError);
 

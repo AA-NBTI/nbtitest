@@ -95,9 +95,12 @@ export async function POST(req) {
       })
     );
 
-    // 에러 발생하더라도 전체가 죽지 않도록 방어
-    await Promise.allSettled(promises);
-
+    // DB 적재는 백그라운드에서 실행 (유저 대기 시간 0으로 단축)
+    Promise.allSettled(promises).catch(err => {
+      console.error('Background DB save failed:', err);
+    });
+    
+    // 연산된 결과값만 즉시 반환하여 결과 페이지로 점프!
     return Response.json({
       mbtiType,
       ntiScore: computedNtiScore, 
@@ -105,6 +108,7 @@ export async function POST(req) {
       confidence: confidence
     });
   } catch (e) {
+    console.error('Calculate Error:', e);
     return Response.json({ error: e.message }, { status: 500 });
   }
 }
