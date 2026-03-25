@@ -5,10 +5,12 @@ import { useRouter } from 'next/navigation';
 import { QuestionSlider } from '@/components/QuestionSlider';
 import { useTestStore } from '@/store/useTestStore';
 import { supabase } from '@/lib/supabase';
+import { useAuth } from '@/app/AuthProvider';
 
 export default function TestPage({ params }) {
   const { type } = params;
   const router = useRouter();
+  const { user } = useAuth(); // [추가] 로그인 상태 가져오기
   const { initTest, questions, currentIndex, resetStore } = useTestStore();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -65,6 +67,7 @@ export default function TestPage({ params }) {
         body: JSON.stringify({
           profileId,
           sessionId,
+          userId: user?.id, // [추가] 로그인한 회원인 경우 ID 전달
           answers,
           testType: type,
           sessionRound: 1,

@@ -20,17 +20,21 @@ export const metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://nbtitest.com'),
 };
 
+import { AuthProvider } from './AuthProvider';
+
 export default function RootLayout({ children }) {
   return (
     <html lang="ko">
       <head>
         <link rel="preconnect" href="https://cdn.jsdelivr.net" />
       </head>
-      {/* paddingTop 50px: 상단 고정 배너가 콘텐츠를 가리지 않도록 */}
+      {/* paddingTop 100px: 상단 고정 배너가 콘텐츠를 가리지 않도록 */}
       <body style={{ margin: 0, padding: 0, paddingTop: '100px' }}>
-        {/* 05. MAIN_TOP: 375×50 전체 페이지 공통 상단 고정 띠배너 */}
-        <GlobalStickyBanner />
-        {children}
+        <AuthProvider>
+          {/* 05. MAIN_TOP: 375×50 전체 페이지 공통 상단 고정 띠배너 */}
+          <GlobalStickyBanner />
+          {children}
+        </AuthProvider>
       </body>
     </html>
   );
