@@ -233,12 +233,18 @@ export default function IntegratedTestDashboard() {
           <p className="text-slate-400 font-bold mt-1">유저가 선택한 각 테스트 버전별 실제 문항 리스트와 소요 시간을 분석합니다.</p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-           {versionGrouped && Object.entries(versionGrouped).map(([key, group]) => {
-             const icons = { 'basic': BookOpen, 'love': Heart, 'work': Briefcase, 'dynamic': Zap };
-             return (
-               <QuestionAccordion key={key} title={`${group.title} 문항 분석`} group={group} icon={icons[key]} />
-             );
-           })}
+           {versionGrouped && Object.values(versionGrouped).some(g => g.items.length > 0) ? (
+             Object.entries(versionGrouped).map(([key, group]) => {
+               const icons = { 'basic': BookOpen, 'love': Heart, 'work': Briefcase, 'dynamic': Zap };
+               return (
+                 <QuestionAccordion key={key} title={`${group.title} 문항 분석`} group={group} icon={icons[key]} />
+               );
+             })
+           ) : (
+             <div className="col-span-2 py-12 text-center bg-slate-50/50 rounded-3xl border border-dashed border-slate-200">
+                <p className="text-slate-400 font-bold text-sm">해당 모드의 버전별 상세 데이터가 아직 수집되지 않았습니다.</p>
+             </div>
+           )}
         </div>
       </section>
 
@@ -250,9 +256,17 @@ export default function IntegratedTestDashboard() {
           </h2>
           <p className="text-slate-400 font-bold mt-1">유형 구분(EI, SN...)에 따른 문항별 고민 시간을 추적합니다.</p>
         </div>
-        {groupedQuestions && Object.entries(groupedQuestions).map(([title, group]) => (
-          <QuestionAccordion key={title} title={title} group={group} />
-        ))}
+        {groupedQuestions && Object.values(groupedQuestions).some(g => g.items.length > 0) ? (
+          Object.entries(groupedQuestions).map(([title, group]) => (
+            <QuestionAccordion key={title} title={title} group={group} />
+          ))
+        ) : (
+          <div className="py-20 text-center bg-white rounded-3xl border border-slate-100">
+             <div className="mb-4 flex justify-center"><Filter size={40} className="text-slate-200" /></div>
+             <p className="text-slate-400 font-bold italic">조건에 맞는 정밀 분석 데이터가 아직 없습니다.</p>
+             <p className="text-[10px] text-slate-300 mt-2 uppercase">No Data Found for Current Filter</p>
+          </div>
+        )}
       </section>
 
       <footer className="text-center pb-20 border-t border-slate-100 pt-12">
