@@ -47,7 +47,10 @@ export default function TestPage({ params }) {
 
   useEffect(() => {
     const { answers } = useTestStore.getState();
-    if (!loading && questions.length > 0 && currentIndex >= questions.length && !submitting && answers.length > 0) {
+    // [강화] 문항 수만큼 응답이 꽉 찼을 때만 제출 (중간에 튀는 현상 방지)
+    const validAnswersCount = answers.filter(a => a !== undefined).length;
+    
+    if (!loading && questions.length > 0 && currentIndex >= questions.length && !submitting && validAnswersCount >= questions.length) {
       setSubmitting(true);
       submitAnswers();
     }
@@ -94,7 +97,20 @@ export default function TestPage({ params }) {
   if (error) return <ErrorScreen message={error} />;
   
 
-  if (submitting) return <LoadingScreen message="결과를 분석하는 중..." />;
+  if (submitting) return (
+    <LoadingScreen message="결과를 분석하는 중...">
+      <button 
+        onClick={() => {
+          localStorage.removeItem(`nbti_progress_${type}`);
+          resetStore();
+          window.location.reload();
+        }}
+        style={{ marginTop: '1rem', fontSize: '0.8rem', color: '#9ca3af', textDecoration: 'underline', background: 'none', border: 'none', cursor: 'pointer' }}
+      >
+        응답 초기화 및 다시 시작하기
+      </button>
+    </LoadingScreen>
+  );
 
   return (
     <main style={{
@@ -128,7 +144,7 @@ export default function TestPage({ params }) {
   );
 }
 
-function LoadingScreen({ message }) {
+function LoadingScreen({ message, children }) {
   return (
     <main style={{
       minHeight: '100vh', background: '#fafafa',
@@ -136,6 +152,7 @@ function LoadingScreen({ message }) {
       fontFamily: "'Pretendard', sans-serif",
     }}>
       <p style={{ color: '#9ca3af', fontSize: '0.9rem' }}>{message}</p>
+      {children}
     </main>
   );
 }
