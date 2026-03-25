@@ -56,7 +56,7 @@ function QuestionAccordion({ title, group, icon: Icon = LayersIcon }) {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50">
-                {items.sort((a,b) => b.count - a.count).map(q => (
+                {items.sort((a,b) => parseFloat(b.avgSec) - parseFloat(a.avgSec)).map(q => (
                   <tr key={q.id} className="group hover:bg-indigo-50/10 transition-colors">
                     <td className="py-4 text-sm font-bold text-slate-600 pr-10 leading-relaxed break-keep">
                        {q.content}
