@@ -25,7 +25,7 @@ export function GlobalStickyBanner() {
 
   if (!mounted) return null;
 
-  if (pathname?.startsWith('/admin')) {
+  if (pathname?.startsWith('/admin') || pathname?.startsWith('/my-dashboard')) {
     return null;
   }
 
