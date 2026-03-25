@@ -49,29 +49,37 @@ export function GlobalStickyBanner() {
     >
       <AdSlot slotId="MAIN_TOP" />
       
-      {/* [신규] 우측 상단 미니멀 로그인/마이페이지 버튼 */}
+      {/* [개선] 우측 상단 로그인/마이페이지 버튼 (가독성 강화) */}
       <Link 
         href={user ? '/my-dashboard' : '/login'}
         style={{
           position: 'absolute',
-          right: '15px',
+          right: '8px',
           top: '50%',
           transform: 'translateY(-50%)',
-          width: '36px',
-          height: '36px',
-          borderRadius: '12px',
-          backgroundColor: user ? '#4f46e5' : '#f1f5f9',
-          color: user ? '#ffffff' : '#94a3b8',
+          padding: '8px 14px',
+          borderRadius: '14px',
+          backgroundColor: user ? '#4f46e5' : '#f8fafc',
+          color: user ? '#ffffff' : '#6366f1',
+          border: user ? 'none' : '1px solid #e0e7ff',
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'center',
+          gap: '8px',
           textDecoration: 'none',
           boxShadow: user ? '0 4px 12px rgba(79, 70, 229, 0.2)' : 'none',
-          zIndex: 10000
+          zIndex: 10000,
+          transition: 'all 0.2s ease'
         }}
-        title={user ? '마이 대시보드' : '로그인'}
       >
-        <User size={18} />
+        <User size={14} strokeWidth={3} />
+        <span style={{ 
+          fontSize: '11px', 
+          fontWeight: '900', 
+          letterSpacing: '-0.02em',
+          whiteSpace: 'nowrap'
+        }}>
+          {user ? '내 정보' : '로그인'}
+        </span>
       </Link>
     </div>
   );
