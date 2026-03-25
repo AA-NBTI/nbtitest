@@ -59,25 +59,30 @@ export default function MyDashboard() {
   return (
     <div className="min-h-screen bg-[#fcfdfe] flex font-sans text-slate-900 overflow-hidden">
       
+      {/* ───── 최상단 네비게이션 바 (Top Header) ───── */}
+      <header className="h-16 bg-white border-b border-slate-100 fixed top-0 left-0 right-0 z-[60] flex items-center px-6">
+         <Link href="/" className="flex items-center gap-2 group transition-all hover:scale-105">
+            <div className="w-8 h-8 rounded-lg bg-indigo-600 text-white flex items-center justify-center shadow-lg shadow-indigo-100">
+               <Home size={18} strokeWidth={3} />
+            </div>
+            <span className="text-lg font-black tracking-tighter text-slate-900 uppercase italic">NBTI <span className="text-indigo-600">Hub</span></span>
+         </Link>
+         
+         <div className="ml-auto flex items-center gap-4">
+            <p className="text-[10px] font-black text-slate-300 uppercase tracking-widest hidden sm:block">Member Dashboard</p>
+            <div className="w-px h-4 bg-slate-100 mx-2" />
+            <div className="flex items-center gap-2 text-[11px] font-bold text-slate-500">
+               <User size={14} className="text-indigo-400" />
+               {user.email}
+            </div>
+         </div>
+      </header>
+      
       {/* ───── 좌측 사이드바 (Sidebar Section) ───── */}
-      <aside className="w-[280px] bg-white border-r border-slate-100 h-screen fixed left-0 top-0 flex flex-col p-8 z-50">
+      <aside className="w-[280px] bg-white border-r border-slate-100 h-screen fixed left-0 top-0 flex flex-col p-8 pt-24 z-50">
           
           <div className="mb-12">
-             {/* [완전 노출 보증] 홈 배너 버튼 */}
-             <div className="mb-10 -mx-4 -mt-4">
-                <Link href="/" className="flex items-center gap-3 p-4 bg-indigo-600 rounded-2xl text-white shadow-xl shadow-indigo-100 hover:bg-indigo-700 transition-all active:scale-95 group">
-                   <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center backdrop-blur-sm">
-                      <Home size={22} strokeWidth={3} />
-                   </div>
-                   <div>
-                      <h1 className="text-lg font-black tracking-tighter leading-none">NBTI HOME</h1>
-                      <p className="text-[10px] font-bold opacity-60 uppercase tracking-tighter mt-1">메인으로 이동</p>
-                   </div>
-                   <ChevronRight size={16} className="ml-auto opacity-40 group-hover:translate-x-1 transition-transform" />
-                </Link>
-             </div>
-
-             <div className="flex items-center gap-3 p-4 bg-slate-50 rounded-2xl border border-slate-100">
+             <div className="flex items-center gap-3 p-4 bg-slate-50 rounded-2xl border border-slate-100 mb-6">
                 <div className="w-8 h-8 rounded-xl bg-white flex items-center justify-center font-black text-xs text-indigo-600 border border-slate-100 italic shadow-sm">U</div>
                 <div className="overflow-hidden">
                    <p className="text-[10px] font-black opacity-30 uppercase tracking-tighter leading-none mb-1">Authenticated</p>
