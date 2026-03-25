@@ -10,17 +10,14 @@ import {
   Layers as LayersIcon,
   ChevronDown,
   ChevronUp,
-  Timer,
-  ChevronRight
+  Timer
 } from 'lucide-react';
 
-function QuestionAccordion({ title, items }) {
+function QuestionAccordion({ title, group }) {
   const [isOpen, setIsOpen] = useState(false);
+  const { items, avg, total } = group || { items: [], avg: 0, total: 0 };
 
   if (!items || items.length === 0) return null;
-
-  // [신규] 해당 그룹(주제)의 평균 고민 시간 계산
-  const groupAvg = (items.reduce((acc, curr) => acc + parseFloat(curr.avgSec), 0) / items.length).toFixed(2);
 
   return (
     <div className="mb-4 border border-slate-100 rounded-2xl overflow-hidden bg-white shadow-sm transition-all hover:bg-slate-50">
@@ -36,7 +33,8 @@ function QuestionAccordion({ title, items }) {
              <span className="font-black text-slate-800 text-lg block leading-none mb-1">{title}</span>
              <div className="flex items-center gap-2">
                 <span className="text-[10px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">{items.length}개 문항</span>
-                <span className="text-[10px] font-black text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full">그룹 평균 {groupAvg}s</span>
+                <span className="text-[10px] font-black text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full">그룹 평균 {avg}s</span>
+                <span className="text-[10px] font-bold text-slate-300">총 {total.toLocaleString()}회 응답</span>
              </div>
           </div>
         </div>
@@ -49,9 +47,9 @@ function QuestionAccordion({ title, items }) {
             <table className="w-full text-left">
               <thead>
                 <tr className="text-[10px] font-black text-slate-300 uppercase tracking-widest border-b border-slate-50">
-                  <th className="py-4">문항 텍스트</th>
-                  <th className="py-4 text-center">집계</th>
-                  <th className="py-4 text-right">평균 고민시간</th>
+                  <th className="py-4">문항 내용</th>
+                  <th className="py-4 text-center">응답수</th>
+                  <th className="py-4 text-right">체크 시간</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-50">
@@ -61,7 +59,7 @@ function QuestionAccordion({ title, items }) {
                        {q.content}
                        <span className="block text-[10px] text-slate-300 font-medium mt-1 uppercase tracking-tighter">{q.id}</span>
                     </td>
-                    <td className="py-4 text-center text-slate-400 text-xs font-bold">{q.count}건</td>
+                    <td className="py-4 text-center text-slate-400 text-xs font-bold">{q.count.toLocaleString()}건</td>
                     <td className="py-4 text-right">
                        <span className={`text-base font-black tracking-tighter ${parseFloat(q.avgSec) > 3.0 ? 'text-orange-500' : 'text-slate-900'}`}>
                          {q.avgSec} <span className="text-[10px] opacity-40">s</span>
@@ -97,16 +95,7 @@ export default function IntegratedTestDashboard() {
     loadDashboard();
   }, []);
 
-  if (loading) {
-    return (
-      <div className="p-12 max-w-7xl mx-auto space-y-12 animate-pulse">
-        <div className="h-10 bg-slate-200 rounded w-1/3 mb-10"></div>
-        <div className="grid grid-cols-4 gap-6">
-          {[1,2,3,4].map(i => <div key={i} className="h-32 bg-slate-200 rounded-2xl"></div>)}
-        </div>
-      </div>
-    );
-  }
+  if (loading) return null;
 
   const { metrics, types, daily, groupedQuestions } = data || {};
 
@@ -114,60 +103,35 @@ export default function IntegratedTestDashboard() {
     <div className="p-8 md:p-14 font-sans text-slate-900 mx-auto max-w-[1400px] bg-[#f8fafc] min-h-screen">
       <header className="mb-14 flex justify-between items-end">
         <div>
-          <h1 className="text-4xl font-black tracking-tighter italic uppercase text-slate-900 mb-2">
+          <h1 className="text-4xl font-black tracking-tighter italic uppercase text-slate-900 mb-2 leading-none">
              NBTI <span className="text-indigo-600">인텔리전스</span>
           </h1>
-          <p className="text-slate-500 font-bold text-sm">실시간 참여 성향 및 문항 인게이지먼트 최적화 센터</p>
+          <p className="text-slate-500 font-bold text-sm">실시간 참여 성향 및 문항 효율 분석 센터</p>
         </div>
       </header>
 
-      {/* 1. 상단 - 핵심 지표 카드 */}
+      {/* 핵심 지표 */}
       <section className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-14">
-        
-        <div className="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm transition-all hover:shadow-md">
-          <div className="flex items-center gap-3 mb-6 text-slate-400 font-bold text-xs uppercase tracking-widest">
-            <Users size={16} className="text-indigo-500" /> 오늘 완료수
+        {[
+          { label: '오늘 완료', value: metrics?.todayTests, unit: '건', color: 'text-indigo-600', icon: Users },
+          { label: '평균 테스트 시간', value: metrics?.avgDurationSec, unit: '초', color: 'text-indigo-600', icon: Clock, border: true },
+          { label: '평균 신뢰도', value: metrics?.avgConfidence, unit: '점', color: 'text-emerald-500', icon: Target },
+          { label: '전체 누적 DB', value: metrics?.totalTests, unit: '건', color: 'text-slate-900', icon: Activity },
+        ].map((m, i) => (
+          <div key={i} className={`bg-white p-8 rounded-3xl border border-slate-200 shadow-sm ${m.border ? 'border-l-8 border-l-indigo-600' : ''}`}>
+            <div className="flex items-center gap-3 mb-6 text-slate-400 font-bold text-xs uppercase tracking-widest">
+              <m.icon size={16} className={m.color} /> {m.label}
+            </div>
+            <p className={`text-5xl font-black tracking-tighter ${m.color}`}>
+              {m.value?.toLocaleString() || 0}
+              <span className="text-lg opacity-40 ml-2">{m.unit}</span>
+            </p>
           </div>
-          <p className="text-5xl font-black text-slate-900 tracking-tighter">
-            {metrics?.todayTests?.toLocaleString() || 0}
-            <span className="text-lg text-slate-300 ml-2">건</span>
-          </p>
-        </div>
-
-        <div className="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm border-l-8 border-l-indigo-600">
-          <div className="flex items-center gap-3 mb-6 text-slate-400 font-bold text-xs uppercase tracking-widest">
-            <Clock size={16} className="text-indigo-600" /> 평균 테스트 시간
-          </div>
-          <p className="text-5xl font-black text-indigo-600 tracking-tighter">
-            {metrics?.avgDurationSec || 0}
-            <span className="text-lg opacity-50 ml-1">초</span>
-          </p>
-        </div>
-
-        <div className="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm transition-all hover:shadow-md">
-          <div className="flex items-center gap-3 mb-6 text-slate-400 font-bold text-xs uppercase tracking-widest">
-            <Target size={16} className="text-emerald-500" /> 평균 신뢰도
-          </div>
-          <p className="text-5xl font-black text-emerald-500 tracking-tighter">
-            {metrics?.avgConfidence || 0}
-            <span className="text-lg opacity-50 ml-1">점</span>
-          </p>
-        </div>
-
-        <div className="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm transition-all hover:shadow-md">
-          <div className="flex items-center gap-3 mb-6 text-slate-400 font-bold text-xs uppercase tracking-widest">
-            <Activity size={16} className="text-slate-900" /> 누적 결과 수
-          </div>
-          <p className="text-5xl font-black text-slate-900 tracking-tighter">
-            {metrics?.totalTests?.toLocaleString() || 0}
-            <span className="text-lg text-slate-300 ml-2">건</span>
-          </p>
-        </div>
+        ))}
       </section>
 
-      {/* 2. 중단 - 분포 및 추이 */}
+      {/* 분포 및 추이 */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-14">
-        
         <div className="bg-white rounded-[40px] p-10 border border-slate-200 shadow-sm">
           <h2 className="text-2xl font-black text-slate-900 mb-8 flex items-center gap-2 italic uppercase">
             <LayersIcon size={22} className="text-indigo-600" /> 버전 선호도
@@ -179,7 +143,7 @@ export default function IntegratedTestDashboard() {
                return (
                  <div key={type}>
                    <div className="flex justify-between mb-2">
-                     <span className="text-xs font-bold text-slate-500">[{label}]</span>
+                     <span className="text-xs font-bold text-slate-500">{label}</span>
                      <span className="font-black text-slate-900 text-xs">{count}건 ({percentage}%)</span>
                    </div>
                    <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
@@ -221,29 +185,23 @@ export default function IntegratedTestDashboard() {
         </div>
       </div>
 
-      {/* 3. 하단 - 그룹화된 문항 평균 체크 시간 분석 */}
+      {/* 그룹화된 문항 상세 분석 */}
       <section className="mb-20">
         <div className="mb-10">
           <h2 className="text-3xl font-black text-slate-900 italic uppercase flex items-center gap-3">
-             <Timer size={28} className="text-indigo-600" /> 문항 인게이지먼트 최적화
+             <Timer size={28} className="text-indigo-600" /> 문항 인게이지먼트 집계
           </h2>
-          <p className="text-slate-400 font-bold mt-1">심리 유형(주제)별 질문들을 펼쳐서 유저의 문항별 고민 시간(평균 체크 시간)을 추적합니다.</p>
+          <p className="text-slate-400 font-bold mt-1">심리 유형(주제)별 질문들을 펼쳐서 개별 문항의 효율성을 분석합니다.</p>
         </div>
 
-        {groupedQuestions && Object.entries(groupedQuestions).map(([title, items]) => (
-          <QuestionAccordion key={title} title={title} items={items} />
+        {groupedQuestions && Object.entries(groupedQuestions).map(([title, group]) => (
+          <QuestionAccordion key={title} title={title} group={group} />
         ))}
-
-        {(!groupedQuestions || Object.keys(groupedQuestions).length === 0) && (
-          <div className="py-20 text-center text-slate-300 font-bold italic bg-white rounded-3xl border border-slate-100">
-            문항별 상세 데이터를 분석 중입니다...
-          </div>
-        )}
       </section>
 
       <footer className="text-center pb-20">
-        <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.4em] italic">
-           NBTI Operational Center • Real-time Data Platform
+        <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.4em] italic leading-none">
+           NBTI Operational Center • Real-time Data Hub
         </p>
       </footer>
     </div>

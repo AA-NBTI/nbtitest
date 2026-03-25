@@ -50,13 +50,13 @@ export async function GET() {
     qStats[r.question_id].count += 1;
   });
 
-  // 문항 데이터 가공 및 그룹화 (주제별)
+  // [신규] 주제별 정밀 데이터 가공
   const groupedQuestions = {
-    'EI (외향/내향)': [],
-    'SN (감각/직관)': [],
-    'TF (사고/감정)': [],
-    'JP (판단/인식)': [],
-    '기타': []
+    'EI (외향/내향)': { items: [], avg: 0, total: 0 },
+    'SN (감각/직관)': { items: [], avg: 0, total: 0 },
+    'TF (사고/감정)': { items: [], avg: 0, total: 0 },
+    'JP (판단/인식)': { items: [], avg: 0, total: 0 },
+    '기타': { items: [], avg: 0, total: 0 }
   };
 
   Object.entries(qStats).forEach(([id, s]) => {
@@ -68,19 +68,29 @@ export async function GET() {
       count: s.count
     };
 
-    if (info.axis === 'EI') groupedQuestions['EI (외향/내향)'].push(item);
-    else if (info.axis === 'SN') groupedQuestions['SN (감각/직관)'].push(item);
-    else if (info.axis === 'TF') groupedQuestions['TF (사고/감정)'].push(item);
-    else if (info.axis === 'JP') groupedQuestions['JP (판단/인식)'].push(item);
-    else groupedQuestions['기타'].push(item);
+    let group = groupedQuestions['기타'];
+    if (info.axis === 'EI') group = groupedQuestions['EI (외향/내향)'];
+    else if (info.axis === 'SN') group = groupedQuestions['SN (감각/직관)'];
+    else if (info.axis === 'TF') group = groupedQuestions['TF (사고/감정)'];
+    else if (info.axis === 'JP') group = groupedQuestions['JP (판단/인식)'];
+
+    group.items.push(item);
+    group.total += s.count;
+  });
+
+  // 그룹별 평균 고민 시간 최종 산출
+  Object.keys(groupedQuestions).forEach(key => {
+    const group = groupedQuestions[key];
+    if (group.items.length > 0) {
+      const sumAvg = group.items.reduce((acc, curr) => acc + parseFloat(curr.avgSec), 0);
+      group.avg = (sumAvg / group.items.length).toFixed(2);
+    }
   });
 
   // Today's boundaries
   const now = new Date();
   const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
-
-  const todayResults = safeResults.filter(r => r.created_at >= todayStart);
-  const todayCount = todayResults.length;
+  const todayCount = safeResults.filter(r => r.created_at >= todayStart).length;
   const avgConf = safeResults.length > 0 
     ? (safeResults.reduce((acc, curr) => acc + (curr.nti_score || 0), 0) / safeResults.length).toFixed(1)
     : 0;
@@ -88,7 +98,6 @@ export async function GET() {
   const avgTimeMs = safeResults.length > 0
     ? safeResults.reduce((acc, curr) => acc + (curr.total_time_ms || 0), 0) / safeResults.length
     : 0;
-  const avgTimeSec = (avgTimeMs / 1000).toFixed(1);
 
   const typeCounts = { basic: 0, love: 0, work: 0, dynamic: 0 };
   safeResults.forEach(r => {
@@ -100,7 +109,7 @@ export async function GET() {
   const dailyStats = {};
   safeResults.forEach(r => {
     const dateStr = r.created_at.split('T')[0];
-    if (!dailyStats[dateStr]) dailyStats[dateStr] = { date: dateStr, count: 0, avgTime: 0, timeSum: 0 };
+    if (!dailyStats[dateStr]) dailyStats[dateStr] = { date: dateStr, count: 0, timeSum: 0 };
     dailyStats[dateStr].count += 1;
     dailyStats[dateStr].timeSum += (r.total_time_ms || 0);
   });
@@ -115,10 +124,10 @@ export async function GET() {
       todayTests: todayCount,
       totalTests: safeResults.length,
       avgConfidence: parseFloat(avgConf),
-      avgDurationSec: parseFloat(avgTimeSec)
+      avgDurationSec: (avgTimeMs / 1000).toFixed(1)
     },
     types: typeCounts, 
     daily: dailyList,
-    groupedQuestions // [수정] 그룹화된 데이터 전송
+    groupedQuestions 
   });
 }
