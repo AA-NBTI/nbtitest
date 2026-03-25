@@ -100,14 +100,18 @@ export default function LandingPage() {
                   ✓ {completedTests.length}개 완료! 새로운 버전을 선택하세요.
                 </p>
               )}
-              {filteredTypes.map(({ type, label, desc }) => (
+          {/* 테스트 유형 선택 */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.8rem' }}>
+            {TEST_TYPES.map(({ type, label, desc }) => {
+              const isDone = completedTests.includes(type);
+              return (
                 <button
                   key={type}
                   onClick={() => router.push(`/${type}`)}
                   style={{
                     width: '100%',
                     padding: '1.25rem 1.5rem',
-                    background: '#fff',
+                    background: isDone ? '#f9fafb' : '#fff',
                     border: '1px solid #e5e7eb',
                     borderRadius: '12px',
                     cursor: 'pointer',
@@ -116,25 +120,48 @@ export default function LandingPage() {
                     justifyContent: 'space-between',
                     alignItems: 'center',
                     transition: 'all 0.2s ease',
+                    opacity: isDone ? 0.8 : 1
                   }}
                   onMouseEnter={e => {
                     e.currentTarget.style.borderColor = '#6366f1';
                     e.currentTarget.style.transform = 'translateY(-2px)';
-                    e.currentTarget.style.boxShadow = '0 6px 12px rgba(0,0,0,0.04)';
                   }}
                   onMouseLeave={e => {
                     e.currentTarget.style.borderColor = '#e5e7eb';
                     e.currentTarget.style.transform = 'translateY(0)';
-                    e.currentTarget.style.boxShadow = 'none';
                   }}
                 >
                   <div>
-                    <p style={{ fontSize: '1rem', fontWeight: '600', color: '#111827', margin: 0 }}>{label}</p>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <p style={{ fontSize: '1rem', fontWeight: '600', color: isDone ? '#9ca3af' : '#111827', margin: 0 }}>{label}</p>
+                      {isDone && <span style={{ fontSize: '0.7rem', color: '#6366f1', fontWeight: '800' }}>✓ 완료</span>}
+                    </div>
                     <p style={{ fontSize: '0.8rem', color: '#9ca3af', margin: '0.25rem 0 0' }}>{desc}</p>
                   </div>
-                  <span style={{ color: '#6366f1', fontSize: '1.2rem', fontWeight: 'bold' }}>→</span>
+                  <span style={{ color: isDone ? '#d1d5db' : '#6366f1', fontSize: '1.2rem', fontWeight: 'bold' }}>→</span>
                 </button>
-              ))}
+              );
+            })}
+          </div>
+
+          {/* 하단 제어부 */}
+          <div style={{ marginTop: '1.5rem', textAlign: 'center' }}>
+            <button
+              onClick={() => {
+                if(confirm('모든 테스트 기록과 진행도를 초기화하시겠습니까?')) {
+                  localStorage.removeItem('completed_nbti_tests');
+                  TEST_TYPES.forEach(t => localStorage.removeItem(`nbti_progress_${t.type}`));
+                  window.location.reload();
+                }
+              }}
+              style={{
+                fontSize: '0.8rem', color: '#9ca3af', textDecoration: 'underline',
+                background: 'none', border: 'none', cursor: 'pointer'
+              }}
+            >
+              전체 테스트 기록 초기화하기
+            </button>
+          </div>
             </>
           )}
         </div>

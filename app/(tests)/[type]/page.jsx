@@ -76,6 +76,11 @@ export default function TestPage({ params }) {
       const result = await res.json();
       if (!res.ok) throw new Error(result.error || '결과 산출 중 오류');
       
+      // [신규] 제출 성공 시 임시 진행도 데이터 삭제 (다음 번에 처음부터 시작 가능하도록)
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem(`nbti_progress_${type}`);
+      }
+
       const query = new URLSearchParams({
         score: result.ntiScore,
         grade: result.ntiGrade,
