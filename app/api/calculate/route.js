@@ -74,6 +74,49 @@ export async function POST(req) {
 
     const totalAdConversions = [...activeAdClicks, ...nativeClickRecords];
 
+    const totalTimeMs = answers.reduce((sum, a) => sum + (a.timeMs || 0), 0);
+    
+    // [강화] DB 컬럼 존재 여부에 상관없이 삽입을 시도하되, 실패 시 기본 필드로 재시도 (마이그레이션 전 대비)
+    const saveToResults = async () => {
+      try {
+        const { error } = await supabase.from('nbti_results').insert({
+          session_id: sessionId,
+          mbti_type: mbtiType,
+          score_ei: sums.EI,
+          score_sn: sums.SN,
+          score_tf: sums.TF,
+          score_jp: sums.JP,
+          nti_score: computedNtiScore,
+          nti_grade: computedGrade,
+          gender: demoInfo?.gender,
+          age_group: demoInfo?.age,
+          region: demoInfo?.region,
+          test_type: testType,
+          total_time_ms: totalTimeMs
+        });
+        
+        // 컬럼이 없어서 오류가 나는 경우 (42703 etc)
+        if (error && error.message.includes('column')) {
+          console.warn("Retrying insert without new columns...");
+          await supabase.from('nbti_results').insert({
+            session_id: sessionId,
+            mbti_type: mbtiType,
+            score_ei: sums.EI,
+            score_sn: sums.SN,
+            score_tf: sums.TF,
+            score_jp: sums.JP,
+            nti_score: computedNtiScore,
+            nti_grade: computedGrade,
+            gender: demoInfo?.gender,
+            age_group: demoInfo?.age,
+            region: demoInfo?.region
+          });
+        }
+      } catch (e) {
+        console.error("Result save failed:", e);
+      }
+    };
+
     if (answers.length > 0) {
       promises.push(supabase.from('nbti_responses').insert(formattedAnswers));
     }
@@ -82,21 +125,7 @@ export async function POST(req) {
       promises.push(supabase.from('nbti_ad_clicks').insert(totalAdConversions));
     }
 
-    promises.push(
-      supabase.from('nbti_results').insert({
-        session_id: sessionId,
-        mbti_type: mbtiType,
-        score_ei: sums.EI,
-        score_sn: sums.SN,
-        score_tf: sums.TF,
-        score_jp: sums.JP,
-        nti_score: computedNtiScore, // 동적 계산
-        nti_grade: computedGrade,
-        gender: demoInfo?.gender,
-        age_group: demoInfo?.age,
-        region: demoInfo?.region
-      })
-    );
+    promises.push(saveToResults()); // [수정] 래퍼 함수로 감싸서 유연하게 대응
 
     // DB 적재는 백그라운드에서 실행 (유저 대기 시간 0으로 단축)
     Promise.allSettled(promises).catch(err => {

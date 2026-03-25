@@ -24,31 +24,16 @@ const LIKERT_OPTIONS = [
   const [selectedValue, setSelectedValue] = useState(null);
   const scrollRef = useRef(null); // Added scrollRef
 
-  // 광고 클릭 후 복환성을 위한 상태 보존 (LocalStorage)
+  // [수정] 영구 저장 및 복원 로직 전체 제거 (사용자 요청: 매번 새로 시작)
   useEffect(() => {
-    if (!testType) return;
-    const saved = localStorage.getItem(`nbti_progress_${testType}`);
-    if (saved) {
-      const idx = parseInt(saved, 10);
-      if (idx > 0 && idx < questions.length) {
-        setCurrentIndex(idx); // Restore currentIndex from store
-      }
-    }
-  }, [questions.length, setCurrentIndex, testType]); 
-
-  useEffect(() => {
-    if (!testType) return;
-    localStorage.setItem(`nbti_progress_${testType}`, currentIndex.toString()); // Save currentIndex from store
     const container = scrollRef.current;
     if (container) {
-      // This part seems to be for a horizontal scroll, but the current layout is vertical.
-      // Keeping it as per instruction, but it might not have a visual effect without a scrollable container.
       container.scrollTo({
         left: currentIndex * container.offsetWidth,
         behavior: 'smooth'
       });
     }
-  }, [currentIndex, testType]); 
+  }, [currentIndex]); 
 
   const question = questions[currentIndex];
 

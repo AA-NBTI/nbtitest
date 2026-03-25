@@ -47,29 +47,6 @@ function ResultContent() {
       .catch(err => console.error("Stats load failed:", err));
   }, []);
 
-  // [고도화] 테스트 완료 내역을 로컬 스토리지에 누적 저장
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const completed = JSON.parse(localStorage.getItem('completed_nbti_tests') || '[]');
-      if (!completed.includes(testType)) {
-        completed.push(testType);
-        localStorage.setItem('completed_nbti_tests', JSON.stringify(completed));
-      }
-    }
-  }, [testType]);
-
-  // NTI 진입 Tier 판정
-  let ntiMessage = `신뢰도 ${confidence}% — 트렌드 지수 확인 불가 (75% 이상 필요)`;
-  let tier = 0;
-
-  if (confidence >= 85) {
-    ntiMessage = `신뢰도 ${confidence}% — 프리미엄 NTI 완전 개방`;
-    tier = 2;
-  } else if (confidence >= 75) {
-    ntiMessage = `신뢰도 ${confidence}% — 일반 쇼핑/연애 분석 개방`;
-    tier = 1;
-  }
-
   const goHome = () => {
     router.push('/');
   };
@@ -86,7 +63,6 @@ function ResultContent() {
       fontFamily: "'Pretendard', 'Apple SD Gothic Neo', sans-serif",
     }}>
 
-      {/* MBTI 결과 */}
       <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
         <p style={{ fontSize: '0.75rem', letterSpacing: '0.2em', color: '#9ca3af', marginBottom: '0.5rem', textTransform: 'uppercase' }}>
           당신의 유형
@@ -97,7 +73,6 @@ function ResultContent() {
         <p style={{ marginTop: '0.5rem', fontSize: '0.9rem', color: '#6b7280' }}>{desc}</p>
       </div>
 
-      {/* 실시간 트렌드 섹션 (박팀장님 추천 볼거리) */}
       {stats && stats.total > 0 && (
         <div style={{
           width: '100%', maxWidth: '360px', background: '#fff', borderRadius: '24px',
@@ -109,7 +84,6 @@ function ResultContent() {
             <span style={{ fontSize: '0.8rem', fontWeight: '800', color: '#111827' }}>참여자 트렌드</span>
             <span style={{ padding: '2px 6px', background: '#eef2ff', borderRadius: '4px', fontSize: '10px', fontWeight: '700', color: '#6366f1' }}>N={stats.total}</span>
           </div>
-          
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
             <div style={{ borderLeft: '3px solid #6366f1', paddingLeft: '10px' }}>
               <p style={{ fontSize: '0.65rem', fontWeight: 'bold', color: '#9ca3af', marginBottom: '4px' }}>주요 성별</p>
@@ -124,14 +98,9 @@ function ResultContent() {
               </h5>
             </div>
           </div>
-
-          <p style={{ fontSize: '0.7rem', color: '#9ca3af', marginTop: '1rem', fontStyle: 'italic' }}>
-            "현재 {Object.entries(stats.region).sort((a,b)=>b[1]-a[1])[0]?.[0] || '전국'} 지역에서 가장 활발히 참여 중입니다!"
-          </p>
         </div>
       )}
 
-      {/* 신뢰도 바 */}
       <div style={{ width: '100%', maxWidth: '360px', marginBottom: '2rem' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
           <span style={{ fontSize: '0.75rem', color: '#9ca3af' }}>신뢰도</span>
@@ -146,15 +115,12 @@ function ResultContent() {
         </div>
       </div>
 
-      {/* 메인 액션 버튼 */}
       <div style={{ width: '100%', maxWidth: '360px', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-        
-        {/* 광고 슬롯 (상단) */}
-        <div className="w-full flex justify-center mb-2">
+        <div className="w-full flex justify-center mb-1">
           <AdSlot slotId="RESULT_TOP" mbtiType={mbtiType} />
         </div>
 
-        {/* 1. NBTI 유형 분석 (블로그 연동) */}
+        {/* 1. NBTI 유형 분석 (블로그 연동 복구) */}
         <button
           onClick={() => window.location.href = `https://mbti.nbtitest.com/${mbtiType.toLowerCase()}-characteristics/`}
           style={{
@@ -162,42 +128,26 @@ function ResultContent() {
             border: 'none', borderRadius: '15px',
             fontSize: '1.1rem', color: '#fff', cursor: 'pointer', fontWeight: '800',
             boxShadow: '0 8px 15px -3px rgba(0, 0, 0, 0.1)',
+            marginBottom: '0.25rem'
           }}
         >
-          NBTI 유형 분석
+          {mbtiType} 유형 분석 보기
         </button>
 
-        {/* 2. 다른 버전 테스트 (홈으로 이동하여 완료된 것 제외 목록 보기) */}
+        {/* 2. 처음으로 (사용자 요청: 단일 텍스트) */}
         <button
           onClick={goHome}
           style={{
-            width: '100%', padding: '1.1rem', background: '#6366f1',
-            border: 'none', borderRadius: '12px',
-            fontSize: '1.05rem', color: '#fff', cursor: 'pointer', fontWeight: '700',
-            marginTop: '0.25rem'
+            width: '100%', padding: '1rem', background: '#6366f1',
+            border: 'none', borderRadius: '15px',
+            fontSize: '1.1rem', color: '#fff', cursor: 'pointer', fontWeight: '800',
+            boxShadow: '0 8px 15px -3px rgba(99, 102, 241, 0.2)',
           }}
         >
-          다른 버전 테스트
+          처음으로
         </button>
 
-        {/* 3. 처음부터 다시하기 (로컬스토리지 초기화 포함) */}
-        <button
-          onClick={() => {
-            if (typeof window !== 'undefined') localStorage.removeItem('completed_nbti_tests');
-            router.push('/');
-          }}
-          style={{
-            width: '100%', padding: '0.9rem', background: '#fff',
-            border: '1px solid #e5e7eb', borderRadius: '12px',
-            fontSize: '0.9rem', color: '#9ca3af', cursor: 'pointer', fontWeight: '600',
-            marginTop: '0.25rem'
-          }}
-        >
-          처음부터 다시 하기
-        </button>
-
-        {/* 광고 슬롯 (하단) */}
-        <div className="w-full flex justify-center mt-4">
+        <div className="w-full flex justify-center mt-3">
           <AdSlot slotId="RESULT_BOTTOM" mbtiType={mbtiType} />
         </div>
       </div>
@@ -208,7 +158,7 @@ function ResultContent() {
 export default function ResultPage() {
   return (
     <Suspense fallback={<div style={{ minHeight: '100vh', background: '#fafafa', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <p style={{ color: '#9ca3af', fontSize: '0.9rem' }}>결과를 불러오는 중...</p>
+      <p style={{ color: '#9ca3af', fontSize: '0.9rem' }}>결과를 분석 중입니다...</p>
     </div>}>
       <ResultContent />
     </Suspense>
