@@ -26,7 +26,7 @@ export async function GET() {
   const { data: questionData, error: qDataError } = await supabase
     .from('nbti_questions')
     .select(`
-      question_id, axis, 
+      question_id, axis, test_type,
       nbti_question_versions!inner (content, is_current)
     `)
     .eq('nbti_question_versions.is_current', true);
@@ -36,7 +36,8 @@ export async function GET() {
     questionData.forEach(q => {
       qMap[q.question_id] = {
         content: q.nbti_question_versions[0]?.content || '내용 없음',
-        axis: q.axis || 'ET'
+        axis: q.axis || 'ETC',
+        testType: q.test_type || 'basic'
       };
     });
   }
@@ -50,7 +51,7 @@ export async function GET() {
     qStats[r.question_id].count += 1;
   });
 
-  // [신규] 주제별 정밀 데이터 가공
+  // [기능 추가] 1. 심리 지표별 그룹화
   const groupedQuestions = {
     'EI (외향/내향)': { items: [], avg: 0, total: 0 },
     'SN (감각/직관)': { items: [], avg: 0, total: 0 },
@@ -59,8 +60,16 @@ export async function GET() {
     '기타': { items: [], avg: 0, total: 0 }
   };
 
+  // [기능 추가] 2. 테스트 버전별 그룹화 (사용자 요청)
+  const versionGrouped = {
+    'basic': { title: '일반형', items: [], avg: 0, total: 0 },
+    'love': { title: '연애형', items: [], avg: 0, total: 0 },
+    'work': { title: '직장형', items: [], avg: 0, total: 0 },
+    'dynamic': { title: '통합형', items: [], avg: 0, total: 0 }
+  };
+
   Object.entries(qStats).forEach(([id, s]) => {
-    const info = qMap[id] || { content: id, axis: 'ETC' };
+    const info = qMap[id] || { content: id, axis: 'ETC', testType: 'basic' };
     const item = {
       id,
       content: info.content,
@@ -68,35 +77,37 @@ export async function GET() {
       count: s.count
     };
 
-    let group = groupedQuestions['기타'];
-    if (info.axis === 'EI') group = groupedQuestions['EI (외향/내향)'];
-    else if (info.axis === 'SN') group = groupedQuestions['SN (감각/직관)'];
-    else if (info.axis === 'TF') group = groupedQuestions['TF (사고/감정)'];
-    else if (info.axis === 'JP') group = groupedQuestions['JP (판단/인식)'];
+    // 1. 지표별 배정
+    let axisGroup = groupedQuestions['기타'];
+    if (info.axis === 'EI') axisGroup = groupedQuestions['EI (외향/내향)'];
+    else if (info.axis === 'SN') axisGroup = groupedQuestions['SN (감각/직관)'];
+    else if (info.axis === 'TF') axisGroup = groupedQuestions['TF (사고/감정)'];
+    else if (info.axis === 'JP') axisGroup = groupedQuestions['JP (판단/인식)'];
+    axisGroup.items.push(item);
+    axisGroup.total += s.count;
 
-    group.items.push(item);
-    group.total += s.count;
+    // 2. 버전별 배정
+    const tGroup = versionGrouped[info.testType] || versionGrouped.basic;
+    tGroup.items.push(item);
+    tGroup.total += s.count;
   });
 
-  // 그룹별 평균 고민 시간 최종 산출
-  Object.keys(groupedQuestions).forEach(key => {
-    const group = groupedQuestions[key];
-    if (group.items.length > 0) {
-      const sumAvg = group.items.reduce((acc, curr) => acc + parseFloat(curr.avgSec), 0);
-      group.avg = (sumAvg / group.items.length).toFixed(2);
-    }
+  // 평균값들 계산
+  [groupedQuestions, versionGrouped].forEach(gSet => {
+     Object.values(gSet).forEach(group => {
+       if (group.items.length > 0) {
+         const sumAvg = group.items.reduce((acc, curr) => acc + parseFloat(curr.avgSec), 0);
+         group.avg = (sumAvg / group.items.length).toFixed(2);
+       }
+     });
   });
 
-  // Today's boundaries
+  // Today Boundaries & Stats
   const now = new Date();
   const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
   const todayCount = safeResults.filter(r => r.created_at >= todayStart).length;
   const avgConf = safeResults.length > 0 
     ? (safeResults.reduce((acc, curr) => acc + (curr.nti_score || 0), 0) / safeResults.length).toFixed(1)
-    : 0;
-
-  const avgTimeMs = safeResults.length > 0
-    ? safeResults.reduce((acc, curr) => acc + (curr.total_time_ms || 0), 0) / safeResults.length
     : 0;
 
   const typeCounts = { basic: 0, love: 0, work: 0, dynamic: 0 };
@@ -124,10 +135,11 @@ export async function GET() {
       todayTests: todayCount,
       totalTests: safeResults.length,
       avgConfidence: parseFloat(avgConf),
-      avgDurationSec: (avgTimeMs / 1000).toFixed(1)
+      avgDurationSec: (safeResults.reduce((acc, curr) => acc + (curr.total_time_ms || 0), 0) / (safeResults.length || 1) / 1000).toFixed(1)
     },
     types: typeCounts, 
     daily: dailyList,
-    groupedQuestions 
+    groupedQuestions,
+    versionGrouped // [추가] 버전별 그룹화 데이터
   });
 }
