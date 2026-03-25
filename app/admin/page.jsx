@@ -19,7 +19,8 @@ import {
   CheckCircle2,
   AlertCircle,
   LayoutDashboard,
-  BrainCircuit
+  BrainCircuit,
+  TrendingUp
 } from 'lucide-react';
 
 function QuestionAccordion({ title, group, icon: Icon = LayersIcon }) {
@@ -83,7 +84,7 @@ export default function IntegratedTestDashboard() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [realOnly, setRealOnly] = useState(true); 
-  const [activeTab, setActiveTab] = useState('version'); // ['version', 'axis']
+  const [activeTab, setActiveTab] = useState('version'); 
 
   useEffect(() => {
     async function loadDashboard() {
@@ -101,9 +102,9 @@ export default function IntegratedTestDashboard() {
     loadDashboard();
   }, [realOnly]);
 
-  if (loading && !data) return <div className="p-20 text-center font-bold text-slate-300 animate-pulse">데이터 로드 중...</div>;
+  if (loading && !data) return <div className="p-20 text-center font-bold text-slate-300 animate-pulse uppercase italic tracking-[0.2em]">NBTI 인텔리전스 로딩 중...</div>;
 
-  const { metrics, types, daily, groupedQuestions, versionGrouped, summary } = data || {};
+  const { metrics, types, daily, hourly, groupedQuestions, versionGrouped, summary } = data || {};
 
   return (
     <div className="p-8 md:p-14 font-sans text-slate-900 mx-auto max-w-[1400px] bg-[#f8fafc] min-h-screen">
@@ -115,10 +116,10 @@ export default function IntegratedTestDashboard() {
           <p className="text-slate-500 font-bold text-sm">실제 유저 성향 및 고도화된 문항 인게이지먼트 센터</p>
         </div>
 
-        <div className="bg-white p-2 border border-slate-200 rounded-2xl flex items-center shadow-sm">
+        <div className="bg-white p-2 border border-slate-200 rounded-2xl flex items-center shadow-sm transition-all hover:border-indigo-100">
            <button 
              onClick={() => setRealOnly(true)}
-             className={`px-4 py-2 rounded-xl text-xs font-black flex items-center gap-2 transition-all ${realOnly ? 'bg-indigo-600 text-white shadow-lg' : 'text-slate-400'}`}
+             className={`px-4 py-2 rounded-xl text-xs font-black flex items-center gap-2 transition-all ${realOnly ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200' : 'text-slate-400'}`}
            >
              <CheckCircle2 size={14} /> 실사용자 (60s+)
            </button>
@@ -131,7 +132,7 @@ export default function IntegratedTestDashboard() {
         </div>
       </header>
 
-      {/* [신규] 카테고리 탭 시스템 */}
+      {/* 카테고리 탭 (요청된 위치) */}
       <section className="mb-14 flex gap-4 border-b border-slate-100 pb-0">
          <button 
            onClick={() => setActiveTab('version')}
@@ -147,10 +148,9 @@ export default function IntegratedTestDashboard() {
          </button>
       </section>
 
-      {/* 탭 컨텐츠 영역 */}
       <div className="bg-white/50 rounded-[48px] p-2 md:p-10 mb-20 border border-slate-100">
         
-        {/* 1. 핵심 지표 (탭과 상관없이 노출) */}
+        {/* 핵심 지표 */}
         <section className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-14">
             {[
             { label: '오늘 완료', value: metrics?.todayTests, unit: '건', color: 'text-indigo-600', icon: Users },
@@ -172,9 +172,11 @@ export default function IntegratedTestDashboard() {
 
         {activeTab === 'version' && (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-14">
-               {/* 버전 선호도 요약 */}
-               <div className="bg-white rounded-[40px] p-10 border border-slate-200 shadow-sm">
+             
+             {/* 분포 및 시간대 분석 */}
+             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-14">
+               {/* 버전 선호도 */}
+               <div className="bg-white rounded-[40px] p-10 border border-slate-200 shadow-sm flex flex-col justify-between">
                   <h2 className="text-xl font-black text-slate-900 mb-8 flex items-center gap-2 italic uppercase">
                     <LayersIcon size={20} className="text-indigo-600" /> 버전 선호도 요약
                   </h2>
@@ -197,31 +199,32 @@ export default function IntegratedTestDashboard() {
                   </div>
                </div>
 
-               {/* 일간 추이 */}
-               <div className="lg:col-span-2 bg-white rounded-[40px] p-10 border border-slate-200 shadow-sm overflow-hidden text-sm">
+               {/* [신규] 시간대별 피크 타임 분석 */}
+               <div className="bg-white rounded-[40px] p-10 border border-slate-200 shadow-sm">
                   <h2 className="text-xl font-black text-slate-900 mb-8 flex items-center gap-2 italic uppercase">
-                    <Calendar size={20} className="text-indigo-600" /> 일간 테스트량 추이
+                    <TrendingUp size={20} className="text-indigo-600" /> 이용 시간대별 분포 (Hourly Peak)
                   </h2>
-                  <div className="overflow-x-auto">
-                    <table className="w-full text-left">
-                      <thead>
-                        <tr className="border-b border-slate-100">
-                          <th className="py-4 font-black text-slate-400 text-[10px] uppercase">작업일자</th>
-                          <th className="py-4 font-black text-slate-400 text-[10px] uppercase text-center">완료 건수</th>
-                          <th className="py-4 font-black text-slate-400 text-[10px] uppercase text-right">평균 소요</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-slate-50">
-                        {daily?.map((d, i) => (
-                          <tr key={d.date} className="hover:bg-slate-50 transition-colors group text-xs font-bold">
-                            <td className="py-4 text-slate-900">{d.date}</td>
-                            <td className="py-4 text-center text-indigo-600 text-lg italic">{d.count}</td>
-                            <td className="py-4 text-right text-slate-500">{d.avgTime}s</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                  <div className="flex items-end justify-between h-48 gap-1 pt-10">
+                     {hourly?.map((count, hour) => {
+                       const maxCount = Math.max(...hourly);
+                       const height = maxCount > 0 ? (count / maxCount * 100) : 0;
+                       return (
+                         <div key={hour} className="flex-1 flex flex-col items-center group relative h-full justify-end">
+                            <div 
+                              className={`w-full rounded-t-sm transition-all group-hover:bg-indigo-600 ${count > 0 ? 'bg-indigo-300' : 'bg-slate-50'}`} 
+                              style={{ height: `${height}%` }}
+                            />
+                            {count > 0 && (
+                              <div className="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-[8px] px-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
+                                {hour}시: {count}건
+                              </div>
+                            )}
+                            <span className="text-[8px] font-black text-slate-300 mt-2 block transform scale-90">{hour}</span>
+                         </div>
+                       );
+                     })}
                   </div>
+                  <p className="text-[10px] text-slate-400 font-bold mt-4 text-center">0시부터 23시까지 유저들이 가장 많이 방문하는 피크 타임을 분석합니다.</p>
                </div>
              </div>
 
@@ -249,7 +252,7 @@ export default function IntegratedTestDashboard() {
                 <p className="text-indigo-600 font-bold text-sm flex items-center gap-2 uppercase italic tracking-widest">
                    <Target size={16} /> Psychometric Analysis Mode
                 </p>
-                <p className="text-slate-500 text-xs mt-1 font-medium">심리 지표(EI, SN, TF, JP)에 따른 문항별 몰입도를 분석하여 테스트 정밀도를 최적화합니다.</p>
+                <p className="text-slate-500 text-xs mt-1 font-medium">유형 지표에 따른 유저들의 문항 몰입 흐름을 분석합니다.</p>
              </div>
              {groupedQuestions && Object.values(groupedQuestions).some(g => g.items.length > 0) ? (
                 Object.entries(groupedQuestions).map(([title, group]) => (
@@ -267,7 +270,7 @@ export default function IntegratedTestDashboard() {
 
       <footer className="text-center pb-20 border-t border-slate-100 pt-12">
         <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.4em] italic leading-none">
-           NBTI Operational Center • v2.3 Categorical Intelligence
+           NBTI Operational Center • v2.4 Temporal Insight Tracking
         </p>
       </footer>
     </div>
