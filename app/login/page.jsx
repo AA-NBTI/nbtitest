@@ -9,7 +9,7 @@ import React, { useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, LogIn, Mail, Lock, UserPlus } from 'lucide-react';
+import { ArrowLeft, LogIn, Mail, Lock, UserPlus, Home } from 'lucide-react';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
