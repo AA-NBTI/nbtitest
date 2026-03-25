@@ -27,8 +27,10 @@ export default function StealthIntelligenceCenter() {
         const json = await res.json();
         const filtered = {};
         Object.entries(json.ads || {}).forEach(([id, ad]) => {
-          // Temporarily show all for debugging
-          filtered[id] = ad;
+          const format = (ad.ad_format || '').toUpperCase();
+          if (format === 'SPONSORED_LIKERT' || format === 'NATIVE_LIKERT' || format === 'STEALTH') {
+            filtered[id] = ad;
+          }
         });
         setData(filtered);
         setLoading(false);

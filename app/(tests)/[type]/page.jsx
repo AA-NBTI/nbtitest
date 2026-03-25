@@ -46,7 +46,8 @@ export default function TestPage({ params }) {
   }, [type]);
 
   useEffect(() => {
-    if (!loading && questions.length > 0 && currentIndex >= questions.length && !submitting) {
+    const { answers } = useTestStore.getState();
+    if (!loading && questions.length > 0 && currentIndex >= questions.length && !submitting && answers.length > 0) {
       setSubmitting(true);
       submitAnswers();
     }
@@ -71,7 +72,15 @@ export default function TestPage({ params }) {
       });
       const result = await res.json();
       if (!res.ok) throw new Error(result.error || '결과 산출 중 오류');
-      router.push(`/results/${result.mbtiType}?score=${result.ntiScore}&grade=${result.ntiGrade}&confidence=${result.confidence}&testType=${type}`);
+      
+      const query = new URLSearchParams({
+        score: result.ntiScore,
+        grade: result.ntiGrade,
+        confidence: result.confidence,
+        testType: type
+      }).toString();
+
+      router.push(`/results/${result.mbtiType}?${query}`);
     } catch (e) {
       console.error(e);
       setSubmitting(false);
@@ -114,7 +123,7 @@ export default function TestPage({ params }) {
           }} />
         </div>
       </div>
-      {currentQuestion && <QuestionSlider question={currentQuestion} />}
+      {currentQuestion && <QuestionSlider question={currentQuestion} testType={type} />}
     </main>
   );
 }

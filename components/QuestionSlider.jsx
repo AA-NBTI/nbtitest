@@ -18,7 +18,7 @@ const LIKERT_OPTIONS = [
   { value: 1, label: '전혀 아니다', color: 'bg-purple-600', border: 'border-purple-600', size: 'w-10 h-10 sm:w-12 sm:h-12' },
 ];
 
-export function QuestionSlider() {
+ export function QuestionSlider({ testType = 'basic' }) {
   const { questions, currentIndex, setAnswer, isTransitioning, setTransitioning, nextQuestion, recordAdClick, fixedAds, setCurrentIndex } = useTestStore();
   const [startTime, setStartTime] = useState(Date.now());
   const [selectedValue, setSelectedValue] = useState(null);
@@ -26,7 +26,7 @@ export function QuestionSlider() {
 
   // 광고 클릭 후 복환성을 위한 상태 보존 (LocalStorage)
   useEffect(() => {
-    const testType = 'default'; // Assuming a default test type or retrieve from context/props if available
+    if (!testType) return;
     const saved = localStorage.getItem(`nbti_progress_${testType}`);
     if (saved) {
       const idx = parseInt(saved, 10);
@@ -34,10 +34,10 @@ export function QuestionSlider() {
         setCurrentIndex(idx); // Restore currentIndex from store
       }
     }
-  }, [questions.length, setCurrentIndex]); // Depend on questions.length and setCurrentIndex
+  }, [questions.length, setCurrentIndex, testType]); 
 
   useEffect(() => {
-    const testType = 'default'; // Assuming a default test type or retrieve from context/props if available
+    if (!testType) return;
     localStorage.setItem(`nbti_progress_${testType}`, currentIndex.toString()); // Save currentIndex from store
     const container = scrollRef.current;
     if (container) {
@@ -48,7 +48,7 @@ export function QuestionSlider() {
         behavior: 'smooth'
       });
     }
-  }, [currentIndex]); // Depend on currentIndex
+  }, [currentIndex, testType]); 
 
   const question = questions[currentIndex];
 
