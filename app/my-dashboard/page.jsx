@@ -63,14 +63,14 @@ export default function MyDashboard() {
       <aside className="w-[280px] bg-white border-r border-slate-100 h-screen fixed left-0 top-0 flex flex-col p-8 z-50">
           
           <div className="mb-12">
-             {/* [추가] 홈 버튼 (로고) */}
-             <Link href="/" className="flex items-center gap-3 group mb-10 transition-transform active:scale-95">
-                <div className="w-10 h-10 rounded-2xl bg-indigo-600 text-white flex items-center justify-center shadow-lg shadow-indigo-100">
-                   <Home size={20} strokeWidth={2.5} />
+             {/* [수정] 더 선명한 홈 버튼 (로고) */}
+             <Link href="/" className="flex items-center gap-3 group mb-12 transition-all hover:-translate-y-1 active:scale-95">
+                <div className="w-12 h-12 rounded-2xl bg-indigo-600 text-white flex items-center justify-center shadow-2xl shadow-indigo-200">
+                   <Home size={24} strokeWidth={2.5} />
                 </div>
                 <div>
-                   <h1 className="text-lg font-black tracking-tight text-slate-900 leading-none">NBTI 홈</h1>
-                   <p className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter mt-1">Main Lobby</p>
+                   <h1 className="text-xl font-black tracking-tighter text-slate-900 leading-none">NBTI</h1>
+                   <p className="text-[10px] font-black text-indigo-500 uppercase tracking-tighter mt-1">Home Portal</p>
                 </div>
              </Link>
 

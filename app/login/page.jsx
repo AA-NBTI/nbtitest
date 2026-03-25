@@ -43,16 +43,16 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen bg-white flex flex-col items-center px-8 pt-12 md:pt-24 font-sans">
       <div className="w-full max-w-[400px]">
-        <Link 
-          href="/" 
-          className="flex items-center gap-2 text-slate-400 font-black text-[10px] uppercase tracking-[0.2em] mb-12 hover:text-black transition-colors"
-        >
-          <ArrowLeft size={14} /> 홈으로 돌아가기
+        <Link href="/" className="flex items-center gap-2 text-slate-400 font-black text-[10px] uppercase tracking-[0.2em] mb-12 hover:text-black transition-colors">
+          <ArrowLeft size={14} /> 메인으로 돌아가기
         </Link>
 
-        <div className="mb-12">
-            <h1 className="text-4xl font-black text-slate-900 tracking-tighter mb-2 italic uppercase">SIGN <span className="text-indigo-600">IN</span></h1>
-            <p className="text-sm font-bold text-slate-400">당신만의 정밀 행동 패턴 데이터 센터로 입장하세요.</p>
+        <div className="flex flex-col items-center mb-10">
+           <Link href="/" className="w-14 h-14 bg-indigo-600 rounded-3xl flex items-center justify-center text-white shadow-xl shadow-indigo-100 mb-6 hover:scale-110 transition-transform">
+              <Home size={28} />
+           </Link>
+           <h1 className="text-4xl font-black text-slate-900 tracking-tighter mb-2 italic uppercase">SIGN <span className="text-indigo-600">IN</span></h1>
+           <p className="text-sm font-bold text-slate-400">행동 패턴 데이터 센터로 입장하세요.</p>
         </div>
 
         <form onSubmit={handleLogin} className="space-y-6">

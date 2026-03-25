@@ -9,7 +9,9 @@ import React, { useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, UserPlus, Mail, Lock, LogIn, ChevronRight, CheckCircle } from 'lucide-react';
+import { 
+  ArrowLeft, UserPlus, Mail, Lock, LogIn, ChevronRight, CheckCircle, Home
+} from 'lucide-react';
 
 export default function SignupPage() {
   const [email, setEmail] = useState('');
@@ -54,16 +56,27 @@ export default function SignupPage() {
   return (
     <div className="min-h-screen bg-white flex flex-col items-center px-8 pt-12 md:pt-24 font-sans">
       <div className="w-full max-w-[400px]">
-        <Link 
-          href="/login" 
+        <Link
+          href="/login"
           className="flex items-center gap-2 text-slate-400 font-black text-[10px] uppercase tracking-[0.2em] mb-12 hover:text-black transition-colors"
         >
           <ArrowLeft size={14} /> 로그인으로 돌아가기
         </Link>
 
-        <div className="mb-12">
-            <h1 className="text-4xl font-black text-slate-900 tracking-tighter mb-2 italic uppercase">SIGN <span className="text-indigo-600">UP</span></h1>
-            <p className="text-sm font-bold text-slate-400 break-keep">이메일 인증 없이 즉시 가입 가능한 스마트 회원가입 시스템입니다.</p>
+        {/* [수정] 더 선명한 홈 버튼 (로고) */}
+        <Link href="/" className="flex items-center gap-3 group mb-12 transition-all hover:-translate-y-1 active:scale-95">
+           <div className="w-12 h-12 rounded-2xl bg-indigo-600 text-white flex items-center justify-center shadow-2xl shadow-indigo-200">
+              <Home size={24} strokeWidth={2.5} />
+           </div>
+           <div>
+              <h1 className="text-xl font-black tracking-tighter text-slate-900 leading-none">NBTI</h1>
+              <p className="text-[10px] font-black text-indigo-500 uppercase tracking-tighter mt-1">Home Portal</p>
+           </div>
+        </Link>
+
+        <div className="flex flex-col items-center mb-10">
+           <h1 className="text-4xl font-black text-slate-900 tracking-tighter mb-2 italic uppercase">SIGN <span className="text-indigo-600">UP</span></h1>
+           <p className="text-sm font-bold text-slate-400 break-keep">즉시 가입 가능한 스마트 회원가입 시스템입니다.</p>
         </div>
 
         <form onSubmit={handleSignup} className="space-y-6">
@@ -71,8 +84,8 @@ export default function SignupPage() {
             <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">이메일 주소 (Email Address)</label>
             <div className="relative">
               <Mail className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300" size={18} />
-              <input 
-                type="email" 
+              <input
+                type="email"
                 required
                 placeholder="nbti@example.com"
                 className="w-full pl-14 pr-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-50 outline-none transition-all"
