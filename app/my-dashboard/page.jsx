@@ -63,16 +63,19 @@ export default function MyDashboard() {
       <aside className="w-[280px] bg-white border-r border-slate-100 h-screen fixed left-0 top-0 flex flex-col p-8 z-50">
           
           <div className="mb-12">
-             {/* [수정] 더 선명한 홈 버튼 (로고) */}
-             <Link href="/" className="flex items-center gap-3 group mb-12 transition-all hover:-translate-y-1 active:scale-95">
-                <div className="w-12 h-12 rounded-2xl bg-indigo-600 text-white flex items-center justify-center shadow-2xl shadow-indigo-200">
-                   <Home size={24} strokeWidth={2.5} />
-                </div>
-                <div>
-                   <h1 className="text-xl font-black tracking-tighter text-slate-900 leading-none">NBTI</h1>
-                   <p className="text-[10px] font-black text-indigo-500 uppercase tracking-tighter mt-1">Home Portal</p>
-                </div>
-             </Link>
+             {/* [완전 노출 보증] 홈 배너 버튼 */}
+             <div className="mb-10 -mx-4 -mt-4">
+                <Link href="/" className="flex items-center gap-3 p-4 bg-indigo-600 rounded-2xl text-white shadow-xl shadow-indigo-100 hover:bg-indigo-700 transition-all active:scale-95 group">
+                   <div className="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center backdrop-blur-sm">
+                      <Home size={22} strokeWidth={3} />
+                   </div>
+                   <div>
+                      <h1 className="text-lg font-black tracking-tighter leading-none">NBTI HOME</h1>
+                      <p className="text-[10px] font-bold opacity-60 uppercase tracking-tighter mt-1">메인으로 이동</p>
+                   </div>
+                   <ChevronRight size={16} className="ml-auto opacity-40 group-hover:translate-x-1 transition-transform" />
+                </Link>
+             </div>
 
              <div className="flex items-center gap-3 p-4 bg-slate-50 rounded-2xl border border-slate-100">
                 <div className="w-8 h-8 rounded-xl bg-white flex items-center justify-center font-black text-xs text-indigo-600 border border-slate-100 italic shadow-sm">U</div>
