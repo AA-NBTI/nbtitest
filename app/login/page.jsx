@@ -1,5 +1,10 @@
 'use client';
 
+/**
+ * [파일명: app/login/page.jsx]
+ * 기능: 로그인 페이지 (풀 한글화 및 UX 강화)
+ */
+
 import React, { useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
@@ -24,7 +29,11 @@ export default function LoginPage() {
     });
 
     if (error) {
-      setError('이메일 또는 비밀번호가 올바르지 않습니다.');
+      if (error.message.includes('Invalid login credentials')) {
+        setError('이메일 또는 비밀번호가 올바르지 않습니다.');
+      } else {
+        setError('로그인 중 오류가 발생했습니다: ' + error.message);
+      }
       setLoading(false);
     } else {
       router.push('/my-dashboard');
@@ -38,17 +47,17 @@ export default function LoginPage() {
           href="/" 
           className="flex items-center gap-2 text-slate-400 font-black text-[10px] uppercase tracking-[0.2em] mb-12 hover:text-black transition-colors"
         >
-          <ArrowLeft size={14} /> Back to Home
+          <ArrowLeft size={14} /> 홈으로 돌아가기
         </Link>
 
         <div className="mb-12">
-            <h1 className="text-4xl font-black text-slate-900 tracking-tighter mb-2 italic">SIGN <span className="text-indigo-600">IN</span></h1>
-            <p className="text-sm font-bold text-slate-400">당신만의 정밀 데이터 센터로 입장하세요.</p>
+            <h1 className="text-4xl font-black text-slate-900 tracking-tighter mb-2 italic uppercase">SIGN <span className="text-indigo-600">IN</span></h1>
+            <p className="text-sm font-bold text-slate-400">당신만의 정밀 행동 패턴 데이터 센터로 입장하세요.</p>
         </div>
 
         <form onSubmit={handleLogin} className="space-y-6">
           <div className="space-y-2">
-            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Email Address</label>
+            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">이메일 주소 (Email Address)</label>
             <div className="relative">
               <Mail className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300" size={18} />
               <input 
@@ -63,13 +72,13 @@ export default function LoginPage() {
           </div>
 
           <div className="space-y-2">
-            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Password</label>
+            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">비밀번호 (Password)</label>
             <div className="relative">
               <Lock className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300" size={18} />
               <input 
                 type="password" 
                 required
-                placeholder="••••••••"
+                placeholder="최소 6자 이상"
                 className="w-full pl-14 pr-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-50 outline-none transition-all"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -84,7 +93,7 @@ export default function LoginPage() {
             disabled={loading}
             className="w-full bg-slate-900 text-white py-5 rounded-2xl font-black flex items-center justify-center gap-3 hover:bg-black transition-all shadow-xl shadow-slate-200 mt-4 disabled:opacity-50"
           >
-            {loading ? '인증 중...' : <><LogIn size={20} /> 로그인</>}
+            {loading ? '로그인 처리 중...' : <><LogIn size={20} /> 로그인</>}
           </button>
         </form>
 
@@ -94,7 +103,7 @@ export default function LoginPage() {
              href="/signup" 
              className="flex items-center gap-2 text-indigo-600 font-black text-[10px] uppercase tracking-[0.2em] hover:opacity-70 transition-all bg-indigo-50 px-6 py-3 rounded-full"
            >
-             <UserPlus size={14} /> Create Account
+             <UserPlus size={14} /> 계정 생성하기
            </Link>
         </div>
       </div>

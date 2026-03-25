@@ -1,17 +1,21 @@
 'use client';
 
+/**
+ * [파일명: app/signup/page.jsx]
+ * 기능: 가동 시 이메일 인증 우회 즉시 가입 및 자동 로그인 지원 (풀 한글화)
+ */
+
 import React, { useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, UserPlus, Mail, Lock, LogIn } from 'lucide-react';
+import { ArrowLeft, UserPlus, Mail, Lock, LogIn, ChevronRight, CheckCircle } from 'lucide-react';
 
 export default function SignupPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [success, setSuccess] = useState(false);
   const router = useRouter();
 
   const handleSignup = async (e) => {
@@ -19,39 +23,33 @@ export default function SignupPage() {
     setLoading(true);
     setError(null);
 
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-    });
+    try {
+      // 1. 서버 API를 호출하여 즉시 승인 회원 생성 (Rate Limit 우회)
+      const res = await fetch('/api/auth/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+      const data = await res.json();
 
-    if (error) {
-      setError('회원가입 중 오류가 발생했습니다: ' + error.message);
-      setLoading(false);
-    } else {
-      setSuccess(true);
+      if (!res.ok) throw new Error(data.error || '회원가입 에러');
+
+      // 2. 가입 성공 시 해당 정보로 즉시 로그인 처리 (유저 편의성 극대화)
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
+
+      if (signInError) throw new Error('자동 로그인 실패: 다시 로그인해주세요.');
+
+      // 3. 대시보드로 이동
+      router.push('/my-dashboard');
+    } catch (err) {
+      console.error(err);
+      setError(err.message === 'User already registered' ? '이미 등록된 이메일입니다.' : err.message);
       setLoading(false);
     }
   };
-
-  if (success) {
-    return (
-      <div className="min-h-screen bg-white flex flex-col items-center px-8 pt-24 font-sans text-center">
-         <div className="w-full max-w-[400px]">
-            <div className="w-20 h-20 bg-emerald-50 text-emerald-500 rounded-full flex items-center justify-center mx-auto mb-10 shadow-lg shadow-emerald-50">
-               <UserPlus size={36} />
-            </div>
-            <h1 className="text-4xl font-black text-slate-900 tracking-tighter mb-4 italic uppercase">WELCOME <span className="text-indigo-600">ABOARD</span></h1>
-            <p className="text-sm font-bold text-slate-400 mb-12 break-keep">이메일을 확인하여 계정을 활성화해주세요.<br/>(인증 후 로그인이 가능합니다.)</p>
-            <Link 
-              href="/login" 
-              className="w-full bg-slate-900 text-white py-5 rounded-2xl font-black flex items-center justify-center gap-3 hover:bg-black transition-all shadow-xl shadow-slate-200"
-            >
-              <LogIn size={20} /> 로그인하러 가기
-            </Link>
-         </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-white flex flex-col items-center px-8 pt-12 md:pt-24 font-sans">
@@ -60,17 +58,17 @@ export default function SignupPage() {
           href="/login" 
           className="flex items-center gap-2 text-slate-400 font-black text-[10px] uppercase tracking-[0.2em] mb-12 hover:text-black transition-colors"
         >
-          <ArrowLeft size={14} /> Back to Sign In
+          <ArrowLeft size={14} /> 로그인으로 돌아가기
         </Link>
 
         <div className="mb-12">
-            <h1 className="text-4xl font-black text-slate-900 tracking-tighter mb-2 italic">SIGN <span className="text-indigo-600">UP</span></h1>
-            <p className="text-sm font-bold text-slate-400">당신만의 정밀 데이터 분석을 정기적으로 시작하세요.</p>
+            <h1 className="text-4xl font-black text-slate-900 tracking-tighter mb-2 italic uppercase">SIGN <span className="text-indigo-600">UP</span></h1>
+            <p className="text-sm font-bold text-slate-400 break-keep">이메일 인증 없이 즉시 가입 가능한 스마트 회원가입 시스템입니다.</p>
         </div>
 
         <form onSubmit={handleSignup} className="space-y-6">
           <div className="space-y-2">
-            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Email Address</label>
+            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">이메일 주소 (Email Address)</label>
             <div className="relative">
               <Mail className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300" size={18} />
               <input 
@@ -85,13 +83,13 @@ export default function SignupPage() {
           </div>
 
           <div className="space-y-2">
-            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">Password</label>
+            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">비밀번호 (Password)</label>
             <div className="relative">
               <Lock className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300" size={18} />
               <input 
                 type="password" 
                 required
-                placeholder="최소 6자 이상"
+                placeholder="6자 이상 입력"
                 minLength="6"
                 className="w-full pl-14 pr-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-50 outline-none transition-all"
                 value={password}
@@ -100,25 +98,52 @@ export default function SignupPage() {
             </div>
           </div>
 
-          {error && <p className="text-rose-500 text-xs font-bold pl-1">{error}</p>}
+          {error && (
+            <div className="bg-rose-50 p-4 rounded-xl flex items-center gap-3 border border-rose-100">
+               <AlertCircle size={14} className="text-rose-500" />
+               <p className="text-rose-500 text-[11px] font-bold">{error}</p>
+            </div>
+          )}
 
           <button 
             type="submit" 
             disabled={loading}
             className="w-full bg-indigo-600 text-white py-5 rounded-2xl font-black flex items-center justify-center gap-3 hover:bg-indigo-700 transition-all shadow-xl shadow-indigo-200 mt-4 disabled:opacity-50"
           >
-            {loading ? '처리 중...' : <><UserPlus size={20} /> 가입하기</>}
+            {loading ? '가입 처리 중...' : <><UserPlus size={20} /> 즉시 가입하기</>}
           </button>
         </form>
 
-        <p className="mt-12 text-center text-slate-400 text-xs font-bold leading-relaxed break-keep">
-           가입 시 NBTI의 서비스 이용약관 및 개인정보 처리방침에 동의한 것으로 간주됩니다.
-        </p>
+        <div className="mt-12 bg-slate-50 p-6 rounded-[2rem] border border-slate-100">
+           <p className="text-[10px] font-black text-indigo-600 uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
+             <CheckCircle size={14} /> NBTI Instant Access
+           </p>
+           <ul className="space-y-3">
+              {[
+                '이메일 인증 대기 시간 없음',
+                '가입 즉시 나만의 대시보드 생성',
+                '전체 테스트 이력 자동 저장 및 분석',
+              ].map((txt, i) => (
+                <li key={i} className="flex items-center gap-2 text-[11px] font-bold text-slate-500">
+                   <div className="w-1 h-1 bg-indigo-300 rounded-full" /> {txt}
+                </li>
+              ))}
+           </ul>
+        </div>
       </div>
 
       <footer className="mt-20 pb-20 text-[10px] font-black text-slate-200 uppercase tracking-[0.4em] italic leading-none">
         NBTI AUTHENTICATION CENTER
       </footer>
     </div>
+  );
+}
+
+// 루시드 아이콘 보조
+function AlertCircle({ size, className }) {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+    </svg>
   );
 }
