@@ -3,6 +3,10 @@ import { getAdminClient } from '@/lib/supabase-admin';
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
+/**
+ * [파일명: api/user/my-stats/route.js]
+ * 기능: 유저별 개인 성향 변동성 분석 및 히스토리 조회 (에러 핸들링 강화)
+ */
 export async function GET(req) {
   try {
     const { searchParams } = new URL(req.url);
@@ -12,25 +16,31 @@ export async function GET(req) {
 
     const supabase = getAdminClient();
 
-    // 1. 유저의 모든 과거 결과 가져오기
-    const { data: results, error: resError } = await supabase
+    // 1. 유저 결과 조회 (실패 시 빈 배열 반환하여 대시보드 중단 방지)
+    let { data: results, error: resError } = await supabase
       .from('nbti_results')
       .select('nti_score, session_id, created_at, mbti_type, test_type')
       .eq('user_id', userId)
       .order('created_at', { ascending: false });
 
-    if (resError) throw new Error(resError.message);
+    if (resError) {
+      console.warn("Schema Error or Fetch Error (nbti_results):", resError.message);
+      results = []; // 유저 ID 컬럼이 아직 없는 경우를 위해 빈 배열 처리
+    }
 
-    // 2. 유저의 모든 과거 문항 응답 가져오기 (is_ad 제외)
-    const { data: responses, error: respError } = await supabase
+    // 2. 유저 응답 상세 조회
+    let { data: responses, error: respError } = await supabase
       .from('nbti_responses')
       .select('question_id, answer_value, session_id, time_ms')
       .eq('user_id', userId)
       .eq('is_ad', false);
 
-    if (respError) throw new Error(respError.message);
+    if (respError) {
+      console.warn("Schema Error or Fetch Error (nbti_responses):", respError.message);
+      responses = [];
+    }
 
-    // 3. 문항 정보 매칭 (내용 표시용)
+    // 3. 문항 정보 매칭
     const { data: questionData } = await supabase
       .from('nbti_questions')
       .select(`question_id, nbti_question_versions!inner (content)`)
@@ -43,7 +53,7 @@ export async function GET(req) {
       });
     }
 
-    // 4. 문항별 일관성(상동성) 분석
+    // 4. 가공 로직
     const consistencyMap = {};
     responses.forEach(r => {
       if (!consistencyMap[r.question_id]) {
@@ -51,7 +61,6 @@ export async function GET(req) {
           id: r.question_id,
           content: qMap[r.question_id] || r.question_id,
           scores: [],
-          avgTime: 0,
           timeSum: 0
         };
       }
@@ -59,12 +68,9 @@ export async function GET(req) {
       consistencyMap[r.question_id].timeSum += (r.time_ms || 0);
     });
 
-    // 분산(Variance) 계산 및 가공
     const questionAnalysis = Object.values(consistencyMap).map(q => {
       const avg = q.scores.reduce((a,b) => a+b, 0) / q.scores.length;
-      // 분산: 값이 얼마나 요동치는지 (상황에 따라 답이 바뀌는 정도)
       const variance = q.scores.reduce((a,b) => a + Math.pow(b - avg, 2), 0) / q.scores.length;
-      
       return {
         ...q,
         avg: avg.toFixed(1),
@@ -72,14 +78,14 @@ export async function GET(req) {
         count: q.scores.length,
         avgTimeSec: (q.timeSum / (q.scores.length || 1) / 1000).toFixed(1)
       };
-    }).sort((a,b) => b.variance - a.variance); // 요동치는 문항 우선순위
+    }).sort((a,b) => b.variance - a.variance);
 
     return Response.json({
       history: results || [],
       consistency: questionAnalysis
     });
   } catch (err) {
-    console.error("My Stats API Error:", err);
-    return Response.json({ error: err.message }, { status: 500 });
+    console.error("My Stats API Critical Error:", err);
+    return Response.json({ error: err.message, history: [], consistency: [] }, { status: 200 }); // 크래시 방지
   }
 }
