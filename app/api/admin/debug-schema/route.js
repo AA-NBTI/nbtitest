@@ -4,26 +4,33 @@ export const dynamic = 'force-dynamic';
 
 /**
  * [파일명: app/api/admin/debug-schema/route.js]
- * 기능: nbti_results 테이블에 user_id 컬럼이 있는지 확인하고 없으면 추가 시도
+ * 기능: nbti_results 및 nbti_profiles 테이블 스키마 정밀 진단
  */
 export async function GET() {
   const supabase = getAdminClient();
   try {
-    // 1. 현재 컬럼 확인
-    const { data: cols } = await supabase.rpc('get_table_columns', { table_name: 'nbti_results' });
-    
-    // RPC가 없는 경우 대비하여 실제 데이터로 체크
-    const { data: sample } = await supabase.from('nbti_results').select('*').limit(1);
-    const hasUserId = sample && sample.length > 0 ? ('user_id' in sample[0]) : false;
+    // 1. nbti_results 테이블 확인
+    const { data: resultsSample } = await supabase.from('nbti_results').select('*').limit(1);
+    const hasResultsUserId = resultsSample && resultsSample.length > 0 ? ('user_id' in resultsSample[0]) : false;
 
-    if (!hasUserId) {
-      // 2. 컬럼 추가 트라이 (SQL Direct)
-      await supabase.rpc('run_sql', { sql: `ALTER TABLE nbti_results ADD COLUMN IF NOT EXISTS user_id uuid REFERENCES auth.users(id);` });
-      await supabase.rpc('run_sql', { sql: `ALTER TABLE nbti_responses ADD COLUMN IF NOT EXISTS user_id uuid REFERENCES auth.users(id);` });
-    }
+    // 2. nbti_profiles 테이블 확인
+    const { data: profilesSample } = await supabase.from('nbti_profiles').select('*').limit(1);
+    const hasProfilesUserId = profilesSample && profilesSample.length > 0 ? ('user_id' in profilesSample[0]) : false;
+    const hasProfilesSessionId = profilesSample && profilesSample.length > 0 ? ('session_id' in profilesSample[0]) : false;
 
-    return Response.json({ hasUserId, sample: sample?.[0] || {} });
+    return Response.json({ 
+      nbti_results: {
+        hasUserId: hasResultsUserId,
+        sample: resultsSample?.[0] || "No data"
+      },
+      nbti_profiles: {
+        hasUserId: hasProfilesUserId,
+        hasSessionId: hasProfilesSessionId,
+        sample: profilesSample?.[0] || "No data"
+      }
+    });
   } catch (err) {
+    console.error("Debug Schema Error:", err);
     return Response.json({ error: err.message }, { status: 500 });
   }
 }

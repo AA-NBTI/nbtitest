@@ -67,14 +67,14 @@ export async function POST(req) {
       try {
         const payload = {
           session_id: sessionId,
-          user_id: userId || null, // [추가] 결과 테이블에도 회원 연동
           mbti_type: mbtiType,
           score_ei: sums.EI,
           score_sn: sums.SN,
           score_tf: sums.TF,
           score_jp: sums.JP,
           nti_score: computedNtiScore,
-          nti_grade: computedGrade,
+          // [해결] DB 컬럼 추가 불가 시, 등급 컬럼에 유저 ID를 숨겨서 저장 (Zero-Migration 브리지)
+          nti_grade: userId ? `${computedGrade}|${userId}` : computedGrade,
           gender: demoInfo?.gender,
           age_group: demoInfo?.age,
           region: demoInfo?.region,
@@ -84,23 +84,11 @@ export async function POST(req) {
 
         const { error } = await supabase.from('nbti_results').insert(payload);
         
-        // 컬럼이 없는 경우 fallback (user_id/test_type/total_time_ms 등 제외)
+        // 컬럼이 없는 경우 fallback (user_id 등 커스텀 컬럼 제외한 최소 삽입)
         if (error && error.message.includes('column')) {
-          console.warn("Retrying insert without extended columns...");
-          const fallback = {
-            session_id: sessionId,
-            mbti_type: mbtiType,
-            score_ei: sums.EI,
-            score_sn: sums.SN,
-            score_tf: sums.TF,
-            score_jp: sums.JP,
-            nti_score: computedNtiScore,
-            nti_grade: computedGrade,
-            gender: demoInfo?.gender,
-            age_group: demoInfo?.age,
-            region: demoInfo?.region
-          };
-          await supabase.from('nbti_results').insert(fallback);
+          console.warn("Retrying insert without extended columns (user_id sync via grade)...");
+          delete payload.user_id; // 만약 payload에 있었다면 제거
+          await supabase.from('nbti_results').insert(payload);
         }
       } catch (e) {
         console.error("Result save failed:", e);
@@ -108,7 +96,15 @@ export async function POST(req) {
     };
 
     if (answers.length > 0) {
-      promises.push(supabase.from('nbti_responses').insert(formattedAnswers));
+      const saveResponses = async () => {
+        const { error } = await supabase.from('nbti_responses').insert(formattedAnswers);
+        if (error && error.message.includes('column')) {
+           console.warn("Retrying responses insert without user_id...");
+           const cleanAnswers = formattedAnswers.map(({ user_id, ...rest }) => rest);
+           await supabase.from('nbti_responses').insert(cleanAnswers);
+        }
+      };
+      promises.push(saveResponses());
     }
     
     if (totalAdConversions.length > 0) {
