@@ -30,12 +30,14 @@ export default function LandingPage() {
         {/* 헤더 (기존 중앙 정렬 복구) */}
         <div style={{ textAlign: 'center', marginBottom: '3.5rem' }}>
           <p style={{ 
-            fontSize: 'clamp(0.65rem, 2.5vw, 0.75rem)', 
-            letterSpacing: '0.15em', 
+            fontSize: 'min(0.65rem, 3.2vw)', 
+            letterSpacing: '0.05em', 
             color: '#94a3b8', 
-            marginBottom: '0.75rem', 
+            marginBottom: '0.6rem', 
             textTransform: 'uppercase',
-            fontWeight: '500'
+            fontWeight: '600',
+            wordBreak: 'keep-all',
+            lineHeight: '1.2'
           }}>
             Next Behavioral Trend Indicator
           </p>
