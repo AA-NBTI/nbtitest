@@ -52,24 +52,26 @@ export function GlobalStickyBanner() {
             justifyContent: 'space-between', 
             alignItems: 'center' 
          }}>
-            {/* 홈으로: 하단 '일반형' 글자와 수직 라인 일치 */}
+            {/* 홈으로: 하단 '일반형' 글자와 폰트 속성(1rem, 700) 및 수직 라인 일치 */}
             <Link href="/" style={{ 
               textDecoration: 'none', 
-              fontSize: '14px', 
-              fontWeight: '950', 
-              color: '#000000',
-              letterSpacing: '-0.02em'
+              fontSize: '1rem', 
+              fontWeight: '700', 
+              color: '#111827',
+              letterSpacing: '-0.02em',
+              paddingLeft: '1.5rem'
             }}>
                홈으로
             </Link>
 
-            {/* 회원가입/대시보드: 하단 화살표(→) 라인과 수직 라인 일치 */}
+            {/* 회원가입/대시보드: 하단 화살표(→) 라인과 폰트 속성(1rem, 700) 및 수직 라인 일치 */}
             <Link href={user ? '/my-dashboard' : '/login?mode=signup'} style={{ 
               textDecoration: 'none', 
-              fontSize: '14px', 
-              fontWeight: '950', 
-              color: '#000000',
-              letterSpacing: '-0.02em'
+              fontSize: '1rem', 
+              fontWeight: '700', 
+              color: '#111827',
+              letterSpacing: '-0.02em',
+              paddingRight: '1.5rem'
             }}>
                {user ? '대시보드' : '회원가입'}
             </Link>

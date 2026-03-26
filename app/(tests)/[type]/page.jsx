@@ -127,7 +127,7 @@ export default function TestPage({ params }) {
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
-      padding: '80px 1rem 4rem', // 상단 여백 축소 (80px)
+      padding: '80px 1.5rem 4rem', // 상단 여백 설정 (80px), 좌우 패딩 1.5rem 표준화
       fontFamily: "'Pretendard', 'Apple SD Gothic Neo', sans-serif",
     }}>
       <div style={{ width: '100%', maxWidth: '480px', marginBottom: '2rem' }}>
