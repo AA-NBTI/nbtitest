@@ -24,11 +24,10 @@ export default function LandingPage() {
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        justifyContent: 'center',
-        padding: '2rem 1.5rem',
+        padding: '80px 1.5rem 4rem', // 상단 여백 설정 (80px)
         fontFamily: "'Pretendard', 'Apple SD Gothic Neo', sans-serif",
       }}>
-        {/* 헤더 */}
+        {/* 헤더 (기존 중앙 정렬 복구) */}
         <div style={{ textAlign: 'center', marginBottom: '3.5rem' }}>
           <p style={{ fontSize: '0.75rem', letterSpacing: '0.25em', color: '#9ca3af', marginBottom: '0.75rem', textTransform: 'uppercase' }}>
             Next Behavioral Trend Indicator
@@ -44,7 +43,7 @@ export default function LandingPage() {
         {/* 테스트 유형 선택 (항상 모든 유형이 초기 상태로 노출됨) */}
         <div style={{
           width: '100%',
-          maxWidth: '420px',
+          maxWidth: '480px',
           display: 'flex',
           flexDirection: 'column',
           gap: '0.75rem',

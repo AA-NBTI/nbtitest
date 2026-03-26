@@ -64,9 +64,7 @@ export function AdSlot({ slotId, mbtiType = 'all' }) {
   }, [slotId, mbtiType]);
 
   const handleAdClick = (e) => {
-    // 기본 동작(링크 이동)을 막고 커스텀 핸들링 (필요 시)
     // recordAdClick이 있다면 여기서 호출
-    console.log('Ad clicked:', ad.brand_name);
   };
 
   if (loading) return <div className="w-full h-24 bg-gray-50 animate-pulse rounded-2xl border border-dashed border-gray-200" />;
@@ -92,7 +90,7 @@ export function AdSlot({ slotId, mbtiType = 'all' }) {
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center gap-3 bg-indigo-600 px-4">
-            <span className="text-white font-black text-sm truncate">{ad.title}</span>
+            <span className="text-white font-bold text-sm truncate">{ad.title}</span>
             <span className="shrink-0 text-indigo-200 text-xs font-bold border border-indigo-400 px-2 py-0.5 rounded-full">알아보기 →</span>
           </div>
         )}
@@ -117,7 +115,7 @@ export function AdSlot({ slotId, mbtiType = 'all' }) {
         onClick={handleAdClick}
         className="block relative"
       >
-        <div className="absolute top-1 right-1 z-10 bg-slate-900/40 backdrop-blur-md text-[8px] font-black text-white px-2 py-[2px] rounded-sm uppercase tracking-tighter shadow-sm">
+        <div className="absolute top-1 right-1 z-10 bg-slate-900/40 backdrop-blur-md text-[8px] font-bold text-white px-2 py-[2px] rounded-sm uppercase tracking-tighter shadow-sm">
           Ad
         </div>
 
@@ -138,10 +136,10 @@ export function AdSlot({ slotId, mbtiType = 'all' }) {
 
         <div className="px-3 py-2 flex items-center justify-between bg-white border-t border-slate-100">
           <div className="flex flex-col max-w-[75%]">
-            <span className="block text-[9px] font-black text-indigo-500 uppercase tracking-widest">{ad.brand_name}</span>
+            <span className="block text-[9px] font-bold text-indigo-500 uppercase tracking-widest">{ad.brand_name}</span>
             <span className="block text-[11px] font-bold text-slate-700 truncate">{ad.title}</span>
           </div>
-          <div className="flex items-center gap-1 bg-slate-50 text-indigo-600 text-[10px] font-black px-2 py-1.5 rounded-lg group-hover:bg-indigo-50 transition-colors shadow-sm border border-slate-100">
+          <div className="flex items-center gap-1 bg-slate-50 text-indigo-600 text-[10px] font-bold px-2 py-1.5 rounded-lg group-hover:bg-indigo-50 transition-colors shadow-sm border border-slate-100">
              열기 <ExternalLink size={10} />
           </div>
         </div>

@@ -127,23 +127,22 @@ export default function TestPage({ params }) {
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
-      padding: '2rem 1rem',
+      padding: '80px 1rem 4rem', // 상단 여백 축소 (80px)
       fontFamily: "'Pretendard', 'Apple SD Gothic Neo', sans-serif",
     }}>
       <div style={{ width: '100%', maxWidth: '480px', marginBottom: '2rem' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-          <span style={{ fontSize: '0.75rem', color: '#9ca3af' }}>{type.toUpperCase()} 테스트</span>
-          <span style={{ fontSize: '0.75rem', color: '#6366f1', fontWeight: '600' }}>
+          <span style={{ fontSize: '0.75rem', color: '#0f172a', fontWeight: '500', letterSpacing: '0.15em' }}>{type.toUpperCase()} 분석 진행률</span>
+          <span style={{ fontSize: '0.75rem', color: '#111827', fontWeight: '600' }}>
             {currentIndex + 1} / {questions.length}
           </span>
         </div>
-        <div style={{ height: '3px', background: '#e5e7eb', borderRadius: '999px' }}>
+        <div style={{ height: '4px', background: '#f1f5f9', borderRadius: '999px', overflow: 'hidden' }}>
           <div style={{
             height: '100%',
             width: `${progress}%`,
-            background: '#6366f1',
-            borderRadius: '999px',
-            transition: 'width 0.3s ease',
+            background: '#0f172a',
+            transition: 'width 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
           }} />
         </div>
       </div>
@@ -155,11 +154,12 @@ export default function TestPage({ params }) {
 function LoadingScreen({ message, children }) {
   return (
     <main style={{
-      minHeight: '100vh', background: '#fafafa',
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      minHeight: '100vh', background: '#ffffff',
+      display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
       fontFamily: "'Pretendard', sans-serif",
     }}>
-      <p style={{ color: '#9ca3af', fontSize: '0.9rem' }}>{message}</p>
+      <div className="w-12 h-12 border-4 border-slate-100 border-t-slate-900 rounded-full animate-spin mb-4" />
+      <p style={{ color: '#94a3b8', fontSize: '0.9rem', fontWeight: '700', letterSpacing: '-0.02em' }}>{message}</p>
       {children}
     </main>
   );
@@ -168,14 +168,15 @@ function LoadingScreen({ message, children }) {
 function ErrorScreen({ message }) {
   return (
     <main style={{
-      minHeight: '100vh', background: '#fafafa',
+      minHeight: '100vh', background: '#ffffff',
       display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-      fontFamily: "'Pretendard', sans-serif", gap: '1rem',
+      fontFamily: "'Pretendard', sans-serif", gap: '1.5rem',
     }}>
-      <p style={{ color: '#ef4444', fontSize: '0.9rem' }}>{message}</p>
+      <p style={{ color: '#111827', fontSize: '1rem', fontWeight: '900' }}>{message}</p>
       <button onClick={() => window.location.reload()} style={{
-        padding: '0.6rem 1.5rem', background: '#6366f1', color: '#fff',
-        border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '0.9rem',
+        padding: '1rem 2.5rem', background: '#111827', color: '#fff',
+        border: 'none', borderRadius: '12px', cursor: 'pointer', fontSize: '0.8rem', fontWeight: '900',
+        textTransform: 'uppercase', letterSpacing: '0.1em'
       }}>다시 시도</button>
     </main>
   );

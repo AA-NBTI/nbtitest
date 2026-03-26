@@ -9,13 +9,13 @@ import { AdSlot } from './AdSlot';
  */
 
 const LIKERT_OPTIONS = [
-  { value: 7, label: '매우 그렇다', color: 'bg-indigo-600', border: 'border-indigo-600', size: 'w-10 h-10 sm:w-12 sm:h-12' },
-  { value: 6, label: '', color: 'bg-indigo-500', border: 'border-indigo-500', size: 'w-10 h-10 sm:w-12 sm:h-12' },
-  { value: 5, label: '', color: 'bg-indigo-400', border: 'border-indigo-400', size: 'w-10 h-10 sm:w-12 sm:h-12' },
-  { value: 4, label: '보통', color: 'bg-gray-400', border: 'border-gray-400', size: 'w-10 h-10 sm:w-12 sm:h-12' },
-  { value: 3, label: '', color: 'bg-purple-400', border: 'border-purple-400', size: 'w-10 h-10 sm:w-12 sm:h-12' },
-  { value: 2, label: '', color: 'bg-purple-500', border: 'border-purple-500', size: 'w-10 h-10 sm:w-12 sm:h-12' },
-  { value: 1, label: '전혀 아니다', color: 'bg-purple-600', border: 'border-purple-600', size: 'w-10 h-10 sm:w-12 sm:h-12' },
+  { value: 7, label: '매우 그렇다', color: 'bg-slate-900', border: 'border-slate-900', size: 'w-10 h-10 sm:w-12 sm:h-12' },
+  { value: 6, label: '', color: 'bg-slate-700', border: 'border-slate-700', size: 'w-10 h-10 sm:w-12 sm:h-12' },
+  { value: 5, label: '', color: 'bg-slate-400', border: 'border-slate-400', size: 'w-10 h-10 sm:w-12 sm:h-12' },
+  { value: 4, label: '보통', color: 'bg-slate-200', border: 'border-slate-300', size: 'w-10 h-10 sm:w-12 sm:h-12' },
+  { value: 3, label: '', color: 'bg-slate-100', border: 'border-slate-200', size: 'w-10 h-10 sm:w-12 sm:h-12' },
+  { value: 2, label: '', color: 'bg-slate-50', border: 'border-slate-100', size: 'w-10 h-10 sm:w-12 sm:h-12' },
+  { value: 1, label: '전혀 아니다', color: 'bg-white', border: 'border-slate-200', size: 'w-10 h-10 sm:w-12 sm:h-12' },
 ];
 
  export function QuestionSlider({ testType = 'basic' }) {
@@ -66,12 +66,12 @@ const LIKERT_OPTIONS = [
           ? "fixed bottom-0 inset-x-0 z-50 h-[50px] bg-slate-50 border-t border-slate-200/60 shadow-[0_-5px_15px_rgba(0,0,0,0.05)] flex items-center justify-center overflow-hidden" 
           : "block w-full overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm hover:shadow-md transition-all relative"}
       >
-        <div className="absolute top-0.5 right-1 z-10 bg-slate-900/40 backdrop-blur-md text-[8px] font-black text-white px-2 py-[2px] rounded-bl-md uppercase tracking-tighter">AD</div>
+        <div className="absolute top-0.5 right-1 z-10 bg-slate-900/40 backdrop-blur-md text-[8px] font-bold text-white px-2 py-[2px] rounded-bl-md uppercase tracking-tighter">AD</div>
         {ad.banner_img_url ? (
           <img src={ad.banner_img_url} alt={ad.brand_name} className={isStickyBottom ? "w-full max-w-[375px] h-[50px] object-cover" : "w-full aspect-[21/9] object-cover"} />
         ) : (
           <div className={`text-center bg-indigo-50 ${isStickyBottom ? 'w-full h-full flex items-center justify-center px-4' : 'p-3'}`}>
-            <p className={`${isStickyBottom ? 'text-[11px]' : 'text-[10px]'} font-black text-indigo-700 m-0 truncate`}>{ad.brand_name ? `[${ad.brand_name}] ` : ''}{ad.title}</p>
+            <p className={`${isStickyBottom ? 'text-[11px]' : 'text-[10px]'} font-bold text-indigo-700 m-0 truncate`}>{ad.brand_name ? `[${ad.brand_name}] ` : ''}{ad.title}</p>
           </div>
         )}
       </a>
@@ -98,8 +98,8 @@ const LIKERT_OPTIONS = [
             >
             {question.ad_format === 'SPONSORED_LIKERT' ? (
               <div className="bg-emerald-50 border border-emerald-200 p-4 sm:p-6 rounded-2xl mb-8 w-[95%] text-center relative overflow-hidden shadow-inner mx-auto">
-                <div className="absolute top-0 right-0 bg-emerald-500 text-white text-[10px] font-black px-3 py-1 rounded-bl-xl shadow-sm tracking-wide">SPONSORED CAMPAIGN</div>
-                <span className="text-emerald-700 font-extrabold text-xs sm:text-sm tracking-widest mb-2 block uppercase">
+                <div className="absolute top-0 right-0 bg-emerald-500 text-white text-[10px] font-bold px-3 py-1 rounded-bl-xl shadow-sm tracking-wide">SPONSORED CAMPAIGN</div>
+                <span className="text-emerald-700 font-semibold text-xs sm:text-sm tracking-widest mb-2 block uppercase">
                   {question.brand_name || '제휴 파트너'} 스페셜 문항
                 </span>
                 <h2 className="text-xl md:text-2xl font-bold text-slate-800 leading-snug break-keep min-h-[4rem] px-2 w-full whitespace-pre-wrap mt-2">
@@ -108,7 +108,7 @@ const LIKERT_OPTIONS = [
               </div>
             ) : (
               <>
-                <span className="text-indigo-600 font-black text-sm tracking-widest mb-4 block">
+                <span className="text-indigo-600 font-bold text-sm tracking-widest mb-4 block">
                   QUESTION {currentIndex + 1}
                 </span>
                 <h2 className="text-xl md:text-2xl font-bold text-gray-800 leading-snug break-keep min-h-[4rem] px-2 w-full whitespace-pre-wrap">
@@ -125,7 +125,7 @@ const LIKERT_OPTIONS = [
                 onClick={() => recordAdClick(question.attachedAd.question_id)}
                 className="mt-6 mb-2 block w-[90%] bg-white border border-slate-200 rounded-xl p-3 cursor-pointer hover:bg-slate-50 transition-all mx-auto relative overflow-hidden group shadow-sm hover:-translate-y-1 active:translate-y-0"
               >
-                <div className="absolute top-0 right-0 bg-slate-200/80 text-[8px] text-slate-500 font-black px-1.5 py-0.5 rounded-bl-lg backdrop-blur-sm z-10 transition-colors group-hover:bg-indigo-100 group-hover:text-indigo-600">스폰서 광고</div>
+                <div className="absolute top-0 right-0 bg-slate-200/80 text-[8px] text-slate-500 font-bold px-1.5 py-0.5 rounded-bl-lg backdrop-blur-sm z-10 transition-colors group-hover:bg-indigo-100 group-hover:text-indigo-600">스폰서 광고</div>
                 {question.attachedAd.banner_img_url && (
                   <div className="w-full aspect-[2/1] mb-3 bg-slate-100 rounded-lg overflow-hidden border border-slate-200 relative flex items-center justify-center shadow-inner">
                      <div className="absolute inset-0 bg-gradient-to-t from-slate-900/10 to-transparent z-10 pointer-events-none" />
@@ -134,7 +134,7 @@ const LIKERT_OPTIONS = [
                 )}
                 <div className="flex items-center justify-between font-bold px-1 mt-1">
                   <span className="text-slate-700 text-[14px] truncate pr-4">{question.attachedAd.content}</span>
-                  <span className="text-indigo-600 font-black text-[11px] group-hover:underline flex items-center gap-1 bg-indigo-50 px-2 py-0.5 rounded-md">알아보기 <span className="text-[9px]">↗</span></span>
+                  <span className="text-indigo-600 font-bold text-[11px] group-hover:underline flex items-center gap-1 bg-indigo-50 px-2 py-0.5 rounded-md">알아보기 <span className="text-[9px]">↗</span></span>
                 </div>
               </a>
             )}
@@ -152,13 +152,13 @@ const LIKERT_OPTIONS = [
         </div>
 
         <div className="w-full flex justify-between items-center px-1 mt-2">
-          <span className="text-indigo-600 font-extrabold text-xs sm:text-sm w-20 text-left leading-tight cursor-default">매우 그렇다</span>
+          <span className="text-indigo-600 font-medium text-xs sm:text-sm w-20 text-left leading-tight cursor-default">매우 그렇다</span>
           <div className="flex items-center text-gray-300 font-bold select-none">
             <span className="text-[14px]">◀</span><span className="text-[12px]">◀</span><span className="text-[10px]">◀</span>
-            <span className="text-gray-500 font-black px-2 text-[13px] sm:text-sm tracking-widest leading-none" style={{ transform: 'translateY(-1px)' }}>보통</span>
+            <span className="text-gray-500 font-medium px-2 text-[13px] sm:text-sm tracking-widest leading-none" style={{ transform: 'translateY(-1px)' }}>보통</span>
             <span className="text-[10px]">▶</span><span className="text-[12px]">▶</span><span className="text-[14px]">▶</span>
           </div>
-          <span className="text-purple-600 font-extrabold text-xs sm:text-sm w-20 text-right leading-tight cursor-default">전혀 아니다</span>
+          <span className="text-purple-600 font-medium text-xs sm:text-sm w-20 text-right leading-tight cursor-default">전혀 아니다</span>
         </div>
       </div>
 

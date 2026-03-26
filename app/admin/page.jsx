@@ -1,78 +1,56 @@
 'use client';
 
+/**
+ * [파일명: app/admin/page.jsx]
+ * 기능: 통합 테스트 운영 관리 시스템 – 2분할 구조 v12
+ * 좌열 (2/5): 제목 + 핵심 지표 + 수직 탭 메뉴
+ * 우열 (3/5): 선택된 탭 콘텐츠
+ */
+
 import React, { useEffect, useState } from 'react';
-import { 
-  Users, 
-  Target, 
-  Activity, 
-  Clock, 
-  Calendar,
-  Layers as LayersIcon,
-  ChevronDown,
-  ChevronUp,
-  Timer,
-  BookOpen,
-  Heart,
-  Briefcase,
-  Zap,
-  Filter,
-  CheckCircle2,
-  AlertCircle,
-  LayoutDashboard,
-  BrainCircuit,
-  TrendingUp
+import {
+  Users, Target, Activity, Clock, Layers, ChevronDown, ChevronUp,
+  Timer, Zap, LayoutDashboard, BrainCircuit, PieChart
 } from 'lucide-react';
 
-function QuestionAccordion({ title, group, icon: Icon = LayersIcon }) {
+function QuestionAccordion({ title, group, icon: Icon = Layers, light = false }) {
   const [isOpen, setIsOpen] = useState(false);
-  const { items, avg, total } = group || { items: [], avg: 0, total: 0 };
+  const items = (group && Array.isArray(group.questions))
+    ? group.questions
+    : (group && group.items) ? group.items : [];
   if (!items || items.length === 0) return null;
 
   return (
-    <div className="mb-4 border border-slate-100 rounded-2xl overflow-hidden bg-white shadow-sm transition-all hover:bg-slate-50">
-      <button onClick={() => setIsOpen(!isOpen)} className="w-full flex justify-between items-center p-6 text-left">
-        <div className="flex items-center gap-4">
-          <div className={`p-2.5 rounded-xl ${isOpen ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200' : 'bg-slate-100 text-slate-400'}`}>
-            <Icon size={18} />
+    <div className={`mb-2 border rounded-lg overflow-hidden transition-all hover:border-slate-400 ${light ? 'bg-slate-50 border-slate-100' : 'bg-white border-slate-200 shadow-sm'}`}>
+      <button onClick={() => setIsOpen(!isOpen)} className="w-full flex justify-between items-center p-4 text-left group">
+        <div className="flex items-center gap-3">
+          <div className={`p-1.5 rounded-md transition-colors ${isOpen ? (light ? 'bg-white text-slate-900' : 'bg-slate-900 text-white') : 'bg-slate-100 text-slate-400'}`}>
+            <Icon size={14} />
           </div>
-          <div>
-             <span className="font-black text-slate-800 text-lg block leading-none mb-1">{title}</span>
-             <div className="flex items-center gap-2">
-                <span className="text-[10px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">{items.length}개 문항</span>
-                <span className="text-[10px] font-black text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full">평균 {avg}s</span>
-                <span className="text-[10px] font-bold text-slate-300">누적 {total.toLocaleString()}회 응답</span>
-             </div>
-          </div>
+          <span className={`font-black text-[13px] uppercase tracking-tight ${light ? 'text-slate-500' : 'text-slate-900'}`}>{title}</span>
         </div>
-        {isOpen ? <ChevronUp size={20} className="text-slate-400" /> : <ChevronDown size={20} className="text-slate-400" />}
+        {isOpen ? <ChevronUp size={16} className="text-slate-900" /> : <ChevronDown size={16} className="text-slate-300" />}
       </button>
 
       {isOpen && (
-        <div className="px-6 pb-6 bg-white border-t border-slate-50">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left">
-              <thead>
-                <tr className="text-[10px] font-black text-slate-300 uppercase tracking-widest border-b border-slate-50">
-                  <th className="py-4">문항 텍스트</th>
-                  <th className="py-4 text-center">응답</th>
-                  <th className="py-4 text-right">평균 고민</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-50">
-                {items.sort((a,b) => parseFloat(b.avgSec) - parseFloat(a.avgSec)).map(q => (
-                  <tr key={q.id} className="group hover:bg-indigo-50/10 transition-colors">
-                    <td className="py-4 text-sm font-bold text-slate-600 pr-10 leading-relaxed break-keep">
-                       {q.content}
-                       <span className="block text-[10px] text-slate-300 font-medium mt-1 uppercase tracking-tighter">{q.id}</span>
-                    </td>
-                    <td className="py-4 text-center text-slate-400 text-xs font-bold">{q.count.toLocaleString()}</td>
-                    <td className="py-4 text-right pr-2">
-                       <span className={`text-base font-black tracking-tighter ${parseFloat(q.avgSec) > 3.0 ? 'text-orange-500' : 'text-slate-900'}`}>{q.avgSec}s</span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+        <div className={`px-4 pb-4 border-t ${light ? 'bg-slate-50 border-slate-200' : 'bg-white border-slate-50'}`}>
+          <div className="space-y-1 mt-3">
+            {items.sort((a, b) => parseFloat(b.avgSec) - parseFloat(a.avgSec)).map(q => (
+              <div key={q.id} className="p-3 bg-white rounded-md border border-slate-100 flex justify-between items-center hover:border-slate-400 transition-all shadow-sm">
+                <div className="flex-1 pr-3">
+                  <p className="text-[0.85rem] font-black text-slate-900 leading-snug break-keep">{q.content}</p>
+                  <div className="flex items-center gap-2 mt-1 opacity-40">
+                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-tighter">{q.id}</span>
+                    <div className="w-1 h-1 bg-slate-300 rounded-full" />
+                    <span className="text-[10px] font-black text-slate-600 uppercase tracking-tighter">{q.axis}</span>
+                  </div>
+                </div>
+                <div className="text-right whitespace-nowrap pl-4">
+                  <div className="text-[0.95rem] font-black text-slate-900 leading-none">{q.avgSec}<span className="text-[0.65rem] text-slate-400 ml-0.5">S</span></div>
+                  <p className="text-[10px] font-black text-slate-300 mt-1 uppercase">Sample: {q.count}</p>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       )}
@@ -82,11 +60,15 @@ function QuestionAccordion({ title, group, icon: Icon = LayersIcon }) {
 
 export default function IntegratedTestDashboard() {
   const [data, setData] = useState(null);
+  const [isMounted, setIsMounted] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [realOnly, setRealOnly] = useState(true); 
-  const [activeTab, setActiveTab] = useState('version'); 
+  const [realOnly, setRealOnly] = useState(true);
+  const [activeTab, setActiveTab] = useState('version');
+
+  useEffect(() => { setIsMounted(true); }, []);
 
   useEffect(() => {
+    if (!isMounted) return;
     async function loadDashboard() {
       setLoading(true);
       try {
@@ -94,185 +76,285 @@ export default function IntegratedTestDashboard() {
         const json = await res.json();
         setData(json);
       } catch (e) {
-        console.error("Dashboard Load Failed:", e);
+        console.error('Dashboard Load Failed:', e);
       } finally {
         setLoading(false);
       }
     }
     loadDashboard();
-  }, [realOnly]);
+  }, [realOnly, isMounted]);
 
-  if (loading && !data) return <div className="p-20 text-center font-bold text-slate-300 animate-pulse uppercase italic tracking-[0.2em]">NBTI 인텔리전스 로딩 중...</div>;
+  if (!isMounted || (loading && !data)) return (
+    <div className="min-h-screen bg-white flex items-center justify-center p-20 flex-col gap-4 font-sans text-center">
+      <div className="w-8 h-8 rounded-full border-4 border-slate-100 border-t-slate-900 animate-spin" />
+      <p className="font-black text-slate-900 tracking-widest text-[11px] uppercase opacity-20">PROTOCOL SYNCING...</p>
+    </div>
+  );
 
-  const { metrics, types, daily, hourly, groupedQuestions, versionGrouped, summary } = data || {};
+  const { dichotomyDistribution, versionGrouped, groupedQuestions, daily, hourly } = data || {};
+
+  const totalSamples = versionGrouped
+    ? Object.values(versionGrouped).reduce((s, g) => s + (g.total || 0), 0)
+    : 0;
+
+  const TABS = [
+    { id: 'version',    label: '버전별 상세분석',    icon: LayoutDashboard },
+    { id: 'axis',       label: '심리지표별 흐름',     icon: BrainCircuit },
+    { id: 'questions',  label: '문항 정밀분석',       icon: Layers },
+    { id: 'times',      label: '데이터 생성 추이',    icon: Clock },
+  ];
 
   return (
-    <div className="p-8 md:p-14 font-sans text-slate-900 mx-auto max-w-[1400px] bg-[#f8fafc] min-h-screen">
-      <header className="mb-14 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 border-b border-slate-100 pb-10">
-        <div>
-          <h1 className="text-4xl font-black tracking-tighter italic uppercase text-slate-900 mb-2 leading-none">
-             NBTI <span className="text-indigo-600">인텔리전스</span>
-          </h1>
-          <p className="text-slate-500 font-bold text-sm">실제 유저 성향 및 고도화된 문항 인게이지먼트 센터</p>
-        </div>
+    <div className="bg-[#fafafa] min-h-screen font-sans text-slate-900">
+      <div className="p-4 md:p-8 lg:p-10 mx-auto max-w-[1200px]">
 
-        <div className="bg-white p-2 border border-slate-200 rounded-2xl flex items-center shadow-sm transition-all hover:border-indigo-100">
-           <button 
-             onClick={() => setRealOnly(true)}
-             className={`px-4 py-2 rounded-xl text-xs font-black flex items-center gap-2 transition-all ${realOnly ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-200' : 'text-slate-400'}`}
-           >
-             <CheckCircle2 size={14} /> 실사용자 (60s+)
-           </button>
-           <button 
-             onClick={() => setRealOnly(false)}
-             className={`px-4 py-2 rounded-xl text-xs font-black flex items-center gap-2 transition-all ${!realOnly ? 'bg-slate-900 text-white shadow-lg' : 'text-slate-400'}`}
-           >
-             <AlertCircle size={14} /> 실험/전체 데이터
-           </button>
-        </div>
-      </header>
+        {/* ── 2분할 grid (좌 2/5 · 우 3/5) ── */}
+        <div className="pt-8 grid grid-cols-1 lg:grid-cols-5 gap-8 items-start">
 
-      {/* 카테고리 탭 (요청된 위치) */}
-      <section className="mb-14 flex gap-4 border-b border-slate-100 pb-0">
-         <button 
-           onClick={() => setActiveTab('version')}
-           className={`px-8 py-5 text-sm font-black italic uppercase flex items-center gap-3 transition-all border-b-4 ${activeTab === 'version' ? 'border-indigo-600 text-indigo-600 bg-white rounded-t-3xl shadow-sm' : 'border-transparent text-slate-300 hover:text-slate-400'}`}
-         >
-           <LayoutDashboard size={18} /> 버전별 상세 분석
-         </button>
-         <button 
-           onClick={() => setActiveTab('axis')}
-           className={`px-8 py-5 text-sm font-black italic uppercase flex items-center gap-3 transition-all border-b-4 ${activeTab === 'axis' ? 'border-indigo-600 text-indigo-600 bg-white rounded-t-3xl shadow-sm' : 'border-transparent text-slate-300 hover:text-slate-400'}`}
-         >
-           <BrainCircuit size={18} /> 심리 지표별 흐름 분석
-         </button>
-      </section>
+          {/* ══════════════════════════════
+              좌열: 제목 + 요약 + 탭 메뉴
+          ══════════════════════════════ */}
+          <div className="lg:col-span-2 space-y-5 lg:sticky lg:top-10">
 
-      <div className="bg-white/50 rounded-[48px] p-2 md:p-10 mb-20 border border-slate-100">
-        
-        {/* 핵심 지표 */}
-        <section className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-14">
-            {[
-            { label: '오늘 완료', value: metrics?.todayTests, unit: '건', color: 'text-indigo-600', icon: Users },
-            { label: '평균 테스트 시간', value: metrics?.avgDurationSec, unit: '초', color: 'text-indigo-600', icon: Clock, border: true },
-            { label: '평균 신뢰도', value: metrics?.avgConfidence, unit: '점', color: 'text-emerald-500', icon: Target },
-            { label: '누적 DB', value: metrics?.totalTests, unit: '건', color: 'text-slate-900', icon: Activity },
-            ].map((m, i) => (
-            <div key={i} className={`bg-white p-8 rounded-3xl border border-slate-200 shadow-sm transition-all hover:shadow-md ${m.border ? 'border-l-8 border-l-indigo-600' : ''}`}>
-                <div className="flex items-center gap-3 mb-6 text-slate-400 font-bold text-xs uppercase tracking-widest">
-                <m.icon size={16} className={m.color} /> {m.label}
-                </div>
-                <p className={`text-4xl font-black tracking-tighter ${m.color}`}>
-                {m.value?.toLocaleString() || 0}
-                <span className="text-lg opacity-40 ml-2">{m.unit}</span>
-                </p>
+            {/* 페이지 제목 */}
+            <div className="pb-5 border-b border-slate-200">
+              <p className="text-[12px] font-black text-slate-400 uppercase tracking-[0.4em] mb-1.5 leading-none">Intelligence Operations</p>
+              <h1 className="text-2xl font-black tracking-tighter uppercase text-slate-900 leading-none">통계분석</h1>
             </div>
-            ))}
-        </section>
 
-        {activeTab === 'version' && (
-          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-             
-             {/* 분포 및 시간대 분석 */}
-             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-14">
-               {/* 버전 선호도 */}
-               <div className="bg-white rounded-[40px] p-10 border border-slate-200 shadow-sm flex flex-col justify-between">
-                  <h2 className="text-xl font-black text-slate-900 mb-8 flex items-center gap-2 italic uppercase">
-                    <LayersIcon size={20} className="text-indigo-600" /> 버전 선호도 요약
-                  </h2>
-                  <div className="space-y-6">
-                    {Object.entries(types || {}).map(([type, count]) => {
-                      const percentage = metrics?.totalTests ? (count / metrics.totalTests * 100).toFixed(1) : 0;
-                      const label = { 'basic': '일반형', 'dynamic': '통합형', 'love': '연애형', 'work': '직장형' }[type] || '기타';
-                      return (
-                        <div key={type}>
-                          <div className="flex justify-between mb-2">
-                            <span className="text-[11px] font-bold text-slate-500">{label}</span>
-                            <span className="font-black text-slate-900 text-xs">{count}건 ({percentage}%)</span>
+            {/* 핵심 요약 3카드 (1행 3열) */}
+            <div className="grid grid-cols-3 gap-2">
+              {[
+                { label: '총 샘플', value: totalSamples.toLocaleString(), icon: Users },
+                { label: '버전 수', value: versionGrouped ? Object.keys(versionGrouped).length : '-', icon: Target },
+                { label: '모드',    value: realOnly ? '실사용' : '전체', icon: Activity },
+              ].map((s, i) => (
+                <div key={i} className="bg-white p-3 rounded-xl border border-slate-100 shadow-sm text-center hover:border-slate-300 transition-all group">
+                  <div className="w-7 h-7 bg-slate-50 rounded-lg flex items-center justify-center mx-auto mb-2 group-hover:bg-slate-900 group-hover:text-white transition-all">
+                    <s.icon size={14} />
+                  </div>
+                  <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">{s.label}</p>
+                  <p className="text-base font-black text-slate-900 tracking-tighter leading-none">{s.value}</p>
+                </div>
+              ))}
+            </div>
+
+            {/* 데이터 필터 토글 */}
+            <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm flex items-center justify-between">
+              <div>
+                <p className="text-[12px] font-black text-slate-900 uppercase tracking-widest leading-none">데이터 필터</p>
+                <p className="text-[11px] font-bold text-slate-400 mt-1">{realOnly ? '실제 사용자 데이터만' : '테스트 포함 전체'}</p>
+              </div>
+              <button
+                onClick={() => setRealOnly(!realOnly)}
+                className={`w-12 h-6 rounded-full transition-all duration-300 relative ${realOnly ? 'bg-slate-900' : 'bg-slate-200'}`}
+              >
+                <div className={`w-4 h-4 bg-white rounded-full absolute top-1 transition-all duration-300 shadow-sm ${realOnly ? 'left-7' : 'left-1'}`} />
+              </button>
+            </div>
+
+            {/* 수직 탭 메뉴 */}
+            <nav className="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
+              {TABS.map(tab => {
+                const Icon = tab.icon;
+                const isActive = activeTab === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`w-full flex items-center gap-3 px-5 py-4 text-left transition-all border-b border-slate-50 last:border-0 ${isActive ? 'bg-slate-900 text-white' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-900'}`}
+                  >
+                    <Icon size={15} strokeWidth={2.5} />
+                    <span className="text-[13px] font-black tracking-tight">{tab.label}</span>
+                    {isActive && <div className="ml-auto w-1.5 h-1.5 rounded-full bg-white/50" />}
+                  </button>
+                );
+              })}
+            </nav>
+          </div>
+
+          {/* ══════════════════════════════
+              우열: 탭 콘텐츠
+          ══════════════════════════════ */}
+          <div className="lg:col-span-3 min-h-[60vh] pb-16">
+
+            {/* ── 버전별 상세분석 ── */}
+            {activeTab === 'version' && versionGrouped && (
+              <div className="grid grid-cols-1 gap-6">
+                {Object.entries(versionGrouped).map(([ver, group]) => (
+                  <div key={ver} className="bg-white p-8 rounded-xl border border-slate-100 shadow-sm transition-all hover:border-slate-900 group relative overflow-hidden">
+                    <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:opacity-[0.08] transition-opacity">
+                      <Target size={120} />
+                    </div>
+
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 border-b border-slate-50 pb-6">
+                      <div className="flex items-center gap-4">
+                        <div className="w-11 h-11 bg-slate-900 text-white rounded-xl flex items-center justify-center shadow-xl">
+                          <Target size={20} />
+                        </div>
+                        <div>
+                          <h3 className="text-[15px] font-black uppercase text-slate-900 tracking-tighter">{group.title} 분석 엔진</h3>
+                          <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest">N={(group.total || 0).toLocaleString()}</p>
+                        </div>
+                      </div>
+                      <div className="bg-slate-50 px-4 py-2 rounded-xl border border-slate-100 text-right">
+                        <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-0.5">RELIABILITY</p>
+                        <p className="text-[13px] font-black text-slate-900">STABLE</p>
+                      </div>
+                    </div>
+
+                    <div className="space-y-6">
+                      {/* 문항 분석 – 전체 폭 */}
+                      <div>
+                        <h4 className="text-[12px] font-black text-slate-900 uppercase tracking-widest mb-4 flex items-center gap-2">
+                          <Layers size={13} className="text-slate-400" /> 수록 문항 정밀 분석
+                        </h4>
+                        <QuestionAccordion title="문항별 반응 데이터" group={group} icon={Zap} light={true} />
+                      </div>
+
+                      {/* 성향 분포 – 전체 폭 */}
+                      <div>
+                        <h4 className="text-[12px] font-black text-slate-900 uppercase tracking-widest mb-4 flex items-center gap-2">
+                          <PieChart size={13} className="text-slate-400" /> 전체 성향 분포
+                        </h4>
+                        <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
+                          {group.mbtiDist && Object.keys(group.mbtiDist).length > 0
+                            ? Object.entries(group.mbtiDist).sort((a, b) => b[1] - a[1]).slice(0, 12).map(([type, count]) => (
+                              <div key={type} className="p-3 bg-slate-50 rounded-xl border border-slate-100 text-center hover:bg-white hover:border-slate-900 transition-all shadow-sm">
+                                <p className="text-[13px] font-black text-slate-900 mb-0.5 leading-none">{type}</p>
+                                <p className="text-[10px] font-bold text-slate-400">{((count / (group.total || 1)) * 100).toFixed(0)}%</p>
+                              </div>
+                            ))
+                            : <div className="col-span-full py-6 text-center text-slate-200 font-black text-[11px] border-2 border-dashed border-slate-50 rounded-xl uppercase tracking-widest">DATA PENDING</div>
+                          }
+                        </div>
+                      </div>
+                    </div>
+
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* ── 심리지표별 흐름 분석 ── */}
+            {activeTab === 'axis' && dichotomyDistribution && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {Object.entries(dichotomyDistribution).map(([axis, dist]) => {
+                  const results = Object.entries(dist);
+                  const total = results.reduce((sum, [, count]) => sum + count, 0);
+                  const p1 = total > 0 ? (results[0][1] / total) * 100 : 50;
+                  const p2 = total > 0 ? (results[1][1] / total) * 100 : 50;
+                  return (
+                    <div key={axis} className="bg-white p-8 rounded-xl border border-slate-100 shadow-sm transition-all hover:border-slate-900 group">
+                      <div className="flex justify-between items-center mb-8">
+                        <h3 className="text-[12px] font-black text-slate-400 uppercase tracking-widest">{axis} DIMENSION</h3>
+                        <div className="p-2.5 bg-slate-50 rounded-xl group-hover:bg-slate-900 group-hover:text-white transition-all shadow-sm">
+                          <PieChart size={15} />
+                        </div>
+                      </div>
+                      <div className="space-y-6">
+                        <div className="flex justify-between items-end">
+                          <div>
+                            <p className="text-4xl font-black text-slate-900 tracking-tighter leading-none uppercase">{results[0][0]}</p>
+                            <p className="text-[13px] font-black text-slate-400 mt-1">{p1.toFixed(1)}%</p>
                           </div>
-                          <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-                            <div className={`h-full rounded-full ${type === 'dynamic' ? 'bg-indigo-600' : 'bg-slate-300'}`} style={{ width: `${percentage}%` }} />
+                          <div className="text-right">
+                            <p className="text-4xl font-black text-slate-900 tracking-tighter leading-none uppercase">{results[1][0]}</p>
+                            <p className="text-[13px] font-black text-slate-400 mt-1">{p2.toFixed(1)}%</p>
+                          </div>
+                        </div>
+                        <div className="h-3 bg-slate-50 rounded-full overflow-hidden flex shadow-inner border border-slate-100">
+                          <div className="h-full bg-slate-900 transition-all duration-1000" style={{ width: `${p1}%` }} />
+                          <div className="h-full bg-slate-200 transition-all duration-1000" style={{ width: `${p2}%` }} />
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* ── 문항 정밀분석 ── */}
+            {activeTab === 'questions' && groupedQuestions && (
+              <div className="space-y-2">
+                {Object.entries(groupedQuestions).map(([axis, group]) => (
+                  <QuestionAccordion key={axis} title={`${axis} 인지 그룹 정밀 통계`} group={group} icon={Zap} />
+                ))}
+              </div>
+            )}
+
+            {/* ── 데이터 생성 추이 ── */}
+            {activeTab === 'times' && hourly && daily && (
+              <div className="space-y-6">
+                {/* 시간대 막대 차트 */}
+                <div className="bg-white p-8 rounded-xl border border-slate-100 shadow-sm hover:border-slate-900 transition-all group">
+                  <div className="flex items-center justify-between mb-8 border-b border-slate-50 pb-6">
+                    <div>
+                      <h2 className="text-[13px] font-black text-slate-900 uppercase tracking-widest flex items-center gap-2">
+                        <Timer size={14} className="text-slate-400" /> 24시간 행동 피크 분석
+                      </h2>
+                      <p className="text-[11px] font-black text-slate-400 uppercase tracking-tight mt-1">시간대별 사용자 유입 패턴</p>
+                    </div>
+                    <div className="bg-slate-900 text-white px-3 py-1 rounded-full text-[10px] font-black uppercase shadow-lg">
+                      Peak: {hourly.indexOf(Math.max(...hourly))}:00
+                    </div>
+                  </div>
+                  <div className="flex items-end justify-between h-40 gap-1 md:gap-1.5">
+                    {hourly.map((count, hr) => {
+                      const max = Math.max(...hourly, 1);
+                      const pct = (count / max) * 100;
+                      return (
+                        <div key={hr} className="flex-1 flex flex-col items-center group/bar">
+                          <div className="w-full relative flex flex-col justify-end h-28 rounded-lg bg-slate-50 overflow-hidden border border-slate-100">
+                            <div
+                              className={`w-full transition-all duration-1000 ${count === max ? 'bg-sky-500' : 'bg-slate-900 group-hover/bar:bg-slate-600'}`}
+                              style={{ height: `${pct}%` }}
+                            />
+                          </div>
+                          <span className={`text-[8px] font-black mt-2 ${count === max ? 'text-slate-900' : 'text-slate-300'}`}>
+                            {hr.toString().padStart(2, '0')}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* 일별 생성 현황 */}
+                <div className="bg-white p-8 rounded-xl border border-slate-100 shadow-sm">
+                  <h2 className="text-[13px] font-black text-slate-900 uppercase tracking-widest mb-6 border-b border-slate-50 pb-5 flex items-center gap-2">
+                    <Activity size={14} className="text-slate-400" /> 일별 생성 현황
+                  </h2>
+                  <div className="space-y-3">
+                    {daily.map((day, idx) => {
+                      const maxCount = Math.max(...daily.map(d => d.count), 1);
+                      const isNewest = idx === 0;
+                      return (
+                        <div key={day.date} className="flex items-center gap-5 p-3.5 bg-slate-50 rounded-xl border border-slate-50 hover:bg-white hover:border-slate-900 transition-all group">
+                          <div className="w-16 shrink-0">
+                            <p className="text-[12px] font-black text-slate-900 tracking-tighter">{day.date.split('-').slice(1).join('/')}</p>
+                            <p className="text-[10px] font-bold text-slate-300 uppercase">{isNewest ? 'Latest' : 'Prev'}</p>
+                          </div>
+                          <div className="flex-1 h-7 bg-white border border-slate-100 rounded-full overflow-hidden relative shadow-inner">
+                            <div
+                              className={`h-full transition-all duration-700 ${isNewest ? 'bg-slate-900' : 'bg-slate-200 group-hover:bg-slate-400'}`}
+                              style={{ width: `${(day.count / maxCount) * 100}%` }}
+                            />
+                            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-[11px] font-black text-slate-900/40 tracking-tighter uppercase group-hover:text-slate-900 transition-all">
+                              {day.count.toLocaleString()} TESTS
+                            </span>
                           </div>
                         </div>
                       );
                     })}
                   </div>
-               </div>
-
-               {/* [신규] 시간대별 피크 타임 분석 */}
-               <div className="bg-white rounded-[40px] p-10 border border-slate-200 shadow-sm">
-                  <h2 className="text-xl font-black text-slate-900 mb-8 flex items-center gap-2 italic uppercase">
-                    <TrendingUp size={20} className="text-indigo-600" /> 이용 시간대별 분포 (Hourly Peak)
-                  </h2>
-                  <div className="flex items-end justify-between h-48 gap-1 pt-10">
-                     {hourly?.map((count, hour) => {
-                       const maxCount = Math.max(...hourly);
-                       const height = maxCount > 0 ? (count / maxCount * 100) : 0;
-                       return (
-                         <div key={hour} className="flex-1 flex flex-col items-center group relative h-full justify-end">
-                            <div 
-                              className={`w-full rounded-t-sm transition-all group-hover:bg-indigo-600 ${count > 0 ? 'bg-indigo-300' : 'bg-slate-50'}`} 
-                              style={{ height: `${height}%` }}
-                            />
-                            {count > 0 && (
-                              <div className="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-[8px] px-1 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-10">
-                                {hour}시: {count}건
-                              </div>
-                            )}
-                            <span className="text-[8px] font-black text-slate-300 mt-2 block transform scale-90">{hour}</span>
-                         </div>
-                       );
-                     })}
-                  </div>
-                  <p className="text-[10px] text-slate-400 font-bold mt-4 text-center">0시부터 23시까지 유저들이 가장 많이 방문하는 피크 타임을 분석합니다.</p>
-               </div>
-             </div>
-
-             {/* 버전별 아코디언 */}
-             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {versionGrouped && Object.values(versionGrouped).some(g => g.items.length > 0) ? (
-                    Object.entries(versionGrouped).map(([key, group]) => {
-                    const icons = { 'basic': BookOpen, 'love': Heart, 'work': Briefcase, 'dynamic': Zap };
-                    return (
-                        <QuestionAccordion key={key} title={`${group.title} 문항 분석`} group={group} icon={icons[key]} />
-                    );
-                    })
-                ) : (
-                    <div className="col-span-2 py-12 text-center bg-slate-50/50 rounded-3xl border border-dashed border-slate-200">
-                        <p className="text-slate-400 font-bold text-sm">해당 모드의 버전별 상세 데이터가 아직 수집되지 않았습니다.</p>
-                    </div>
-                )}
-             </div>
-          </div>
-        )}
-
-        {activeTab === 'axis' && (
-          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-             <div className="mb-10 p-6 bg-indigo-50/50 rounded-3xl border border-indigo-100">
-                <p className="text-indigo-600 font-bold text-sm flex items-center gap-2 uppercase italic tracking-widest">
-                   <Target size={16} /> Psychometric Analysis Mode
-                </p>
-                <p className="text-slate-500 text-xs mt-1 font-medium">유형 지표에 따른 유저들의 문항 몰입 흐름을 분석합니다.</p>
-             </div>
-             {groupedQuestions && Object.values(groupedQuestions).some(g => g.items.length > 0) ? (
-                Object.entries(groupedQuestions).map(([title, group]) => (
-                    <QuestionAccordion key={title} title={title} group={group} />
-                ))
-                ) : (
-                <div className="py-20 text-center bg-white rounded-3xl border border-slate-100">
-                    <div className="mb-4 flex justify-center"><Filter size={40} className="text-slate-200" /></div>
-                    <p className="text-slate-400 font-bold italic">조건에 맞는 정밀 분석 데이터가 아직 없습니다.</p>
                 </div>
-             )}
-          </div>
-        )}
-      </div>
+              </div>
+            )}
 
-      <footer className="text-center pb-20 border-t border-slate-100 pt-12">
-        <p className="text-[10px] font-black text-slate-300 uppercase tracking-[0.4em] italic leading-none">
-           NBTI Operational Center • v2.4 Temporal Insight Tracking
-        </p>
-      </footer>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

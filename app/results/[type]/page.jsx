@@ -54,46 +54,45 @@ function ResultContent() {
   return (
     <main style={{
       minHeight: '100vh',
-      background: '#fafafa',
+      background: '#ffffff',
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
       justifyContent: 'center',
       padding: '2rem 1.5rem',
-      fontFamily: "'Pretendard', 'Apple SD Gothic Neo', sans-serif",
+      fontFamily: "'Apple SD Gothic Neo', sans-serif",
+      color: '#111827'
     }}>
 
-      <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
-        <p style={{ fontSize: '0.75rem', letterSpacing: '0.2em', color: '#9ca3af', marginBottom: '0.5rem', textTransform: 'uppercase' }}>
-          당신의 유형
+      <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
+        <p style={{ fontSize: '0.8rem', letterSpacing: '0.4em', color: '#64748b', marginBottom: '0.75rem', textTransform: 'uppercase', fontWeight: '500' }}>
+          분석 결과 리포트
         </p>
-        <h1 style={{ fontSize: 'clamp(2.5rem, 10vw, 4rem)', fontWeight: '800', color: '#111827', letterSpacing: '-0.03em', margin: 0 }}>
+        <h1 style={{ fontSize: 'clamp(3rem, 12vw, 5rem)', fontWeight: '800', color: '#111827', letterSpacing: '-0.05em', margin: 0, lineHeight: 0.9 }}>
           {mbtiType}
         </h1>
-        <p style={{ marginTop: '0.5rem', fontSize: '0.9rem', color: '#6b7280' }}>{desc}</p>
+        <p style={{ marginTop: '1.25rem', fontSize: '1rem', color: '#94a3b8', fontWeight: '600' }}>{desc}</p>
       </div>
 
       {stats && stats.total > 0 && (
         <div style={{
-          width: '100%', maxWidth: '360px', background: '#fff', borderRadius: '24px',
-          padding: '1.5rem', marginBottom: '1.5rem', border: '1px solid #f3f4f6',
-          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.05)'
+          width: '100%', maxWidth: '400px', background: '#f8fafc', borderRadius: '32px',
+          padding: '2rem', marginBottom: '2rem', border: '1px solid #f1f5f9',
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '1rem' }}>
-            <span style={{ fontSize: '0.9rem', fontWeight: '800', color: '#6366f1' }}>REAL-TIME</span>
-            <span style={{ fontSize: '0.8rem', fontWeight: '800', color: '#111827' }}>참여자 트렌드</span>
-            <span style={{ padding: '2px 6px', background: '#eef2ff', borderRadius: '4px', fontSize: '10px', fontWeight: '700', color: '#6366f1' }}>N={stats.total}</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '1.5rem' }}>
+            <span style={{ fontSize: '0.9rem', fontWeight: '700', color: '#0f172a', letterSpacing: '0.05em' }}>실시간 트렌드</span>
+            <span style={{ padding: '2px 8px', background: '#4f46e5', borderRadius: '6px', fontSize: '10px', fontWeight: '600', color: '#ffffff' }}>N={stats.total}</span>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-            <div style={{ borderLeft: '3px solid #6366f1', paddingLeft: '10px' }}>
-              <p style={{ fontSize: '0.65rem', fontWeight: 'bold', color: '#9ca3af', marginBottom: '4px' }}>주요 성별</p>
-              <h5 style={{ fontSize: '1rem', fontWeight: '800', color: '#111827' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+            <div style={{ borderLeft: '4px solid #4f46e5', paddingLeft: '12px' }}>
+              <p style={{ fontSize: '0.65rem', fontWeight: '500', color: '#94a3b8', marginBottom: '6px', textTransform: 'uppercase' }}>주요 성별</p>
+              <h5 style={{ fontSize: '1.1rem', fontWeight: '700', color: '#111827' }}>
                 {Object.entries(stats.gender).sort((a,b)=>b[1]-a[1])[0]?.[0] || '분석 중'}
               </h5>
             </div>
-            <div style={{ borderLeft: '3px solid #10b981', paddingLeft: '10px' }}>
-              <p style={{ fontSize: '0.65rem', fontWeight: 'bold', color: '#9ca3af', marginBottom: '4px' }}>핵심 연령대</p>
-              <h5 style={{ fontSize: '1rem', fontWeight: '800', color: '#111827' }}>
+            <div style={{ borderLeft: '4px solid #94a3b8', paddingLeft: '12px' }}>
+              <p style={{ fontSize: '0.65rem', fontWeight: '500', color: '#94a3b8', marginBottom: '6px', textTransform: 'uppercase' }}>핵심 연령대</p>
+              <h5 style={{ fontSize: '1.1rem', fontWeight: '700', color: '#111827' }}>
                 {Object.entries(stats.age).sort((a,b)=>b[1]-a[1])[0]?.[0] || '분석 중'}
               </h5>
             </div>
@@ -101,53 +100,63 @@ function ResultContent() {
         </div>
       )}
 
-      <div style={{ width: '100%', maxWidth: '360px', marginBottom: '2rem' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-          <span style={{ fontSize: '0.75rem', color: '#9ca3af' }}>신뢰도</span>
-          <span style={{ fontSize: '0.75rem', fontWeight: '700', color: '#6366f1' }}>{confidence}%</span>
+      <div style={{ width: '100%', maxWidth: '400px', marginBottom: '3rem' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
+          <span style={{ fontSize: '0.75rem', color: '#94a3b8', fontWeight: '500', textTransform: 'uppercase' }}>신뢰도 스코어</span>
+          <span style={{ fontSize: '0.75rem', fontWeight: '600', color: '#111827' }}>{confidence}%</span>
         </div>
-        <div style={{ height: '4px', background: '#e5e7eb', borderRadius: '999px' }}>
+        <div style={{ height: '6px', background: '#f1f5f9', borderRadius: '999px', overflow: 'hidden' }}>
           <div style={{
             height: '100%', width: `${confidence}%`,
-            background: confidence >= 85 ? '#6366f1' : confidence >= 75 ? '#8b5cf6' : '#d1d5db',
-            borderRadius: '999px', transition: 'width 0.6s ease',
+            background: '#111827',
+            transition: 'width 1s cubic-bezier(0.4, 0, 0.2, 1)',
           }} />
         </div>
       </div>
 
-      <div style={{ width: '100%', maxWidth: '360px', display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-        <div className="w-full flex justify-center mb-1">
+      <div style={{ width: '100%', maxWidth: '400px', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        <div className="w-full flex justify-center mb-2">
           <AdSlot slotId="RESULT_TOP" mbtiType={mbtiType} />
         </div>
 
-        {/* 1. NBTI 유형 분석 (블로그 연동 복구) */}
+        {/* 1. NBTI 유형 분석 */}
         <button
           onClick={() => window.location.href = `https://mbti.nbtitest.com/${mbtiType.toLowerCase()}-characteristics/`}
           style={{
-            width: '100%', padding: '1.25rem', background: '#111827',
-            border: 'none', borderRadius: '15px',
-            fontSize: '1.1rem', color: '#fff', cursor: 'pointer', fontWeight: '800',
-            boxShadow: '0 8px 15px -3px rgba(0, 0, 0, 0.1)',
-            marginBottom: '0.25rem'
+            width: '100%', padding: '1.5rem', background: '#111827',
+            border: 'none', borderRadius: '20px',
+            fontSize: '1.1rem', color: '#fff', cursor: 'pointer', fontWeight: '700',
+            boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.2)',
+            transition: 'transform 0.2s ease',
           }}
+          onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
+          onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
         >
-          {mbtiType} 유형 분석 보기
+          {mbtiType} 분석 Report 보러가기
         </button>
 
         {/* 2. 처음으로 (사용자 요청: 단일 텍스트) */}
         <button
           onClick={goHome}
           style={{
-            width: '100%', padding: '1rem', background: '#6366f1',
-            border: 'none', borderRadius: '15px',
-            fontSize: '1.1rem', color: '#fff', cursor: 'pointer', fontWeight: '800',
-            boxShadow: '0 8px 15px -3px rgba(99, 102, 241, 0.2)',
+            width: '100%', padding: '1.25rem', background: '#ffffff',
+            border: '1px solid #e2e8f0', borderRadius: '20px',
+            fontSize: '1.1rem', color: '#111827', cursor: 'pointer', fontWeight: '700',
+            transition: 'all 0.2s ease',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = '#f8fafc';
+            e.currentTarget.style.borderColor = '#111827';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = '#ffffff';
+            e.currentTarget.style.borderColor = '#e2e8f0';
           }}
         >
-          처음으로
+          처음으로 돌아가기
         </button>
 
-        <div className="w-full flex justify-center mt-3">
+        <div className="w-full flex justify-center mt-4">
           <AdSlot slotId="RESULT_BOTTOM" mbtiType={mbtiType} />
         </div>
       </div>
@@ -157,8 +166,9 @@ function ResultContent() {
 
 export default function ResultPage() {
   return (
-    <Suspense fallback={<div style={{ minHeight: '100vh', background: '#fafafa', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <p style={{ color: '#9ca3af', fontSize: '0.9rem' }}>결과를 분석 중입니다...</p>
+    <Suspense fallback={<div style={{ minHeight: '100vh', background: '#ffffff', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+      <div className="w-12 h-12 border-4 border-slate-100 border-t-slate-900 rounded-full animate-spin mb-4" />
+      <p style={{ color: '#94a3b8', fontSize: '0.9rem', fontWeight: '700' }}>결과를 분석 중입니다...</p>
     </div>}>
       <ResultContent />
     </Suspense>

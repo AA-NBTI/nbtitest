@@ -54,41 +54,41 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white flex flex-col items-center px-8 pt-12 md:pt-24 font-sans">
-      <div className="w-full max-w-[400px]">
+    <div className="min-h-screen bg-[#fafafa] flex flex-col items-center px-6 pt-12 md:pt-20 font-sans text-slate-900">
+      <div className="w-full max-w-[480px]">
         <Link
           href="/login"
-          className="flex items-center gap-2 text-slate-400 font-black text-[10px] uppercase tracking-[0.2em] mb-12 hover:text-black transition-colors"
+          className="flex items-center gap-2 text-slate-300 font-bold text-[10px] uppercase tracking-[0.2em] mb-12 hover:text-black transition-colors"
         >
           <ArrowLeft size={14} /> 로그인으로 돌아가기
         </Link>
 
         {/* [수정] 더 선명한 홈 버튼 (로고) */}
-        <Link href="/" className="flex items-center gap-3 group mb-12 transition-all hover:-translate-y-1 active:scale-95">
-           <div className="w-12 h-12 rounded-2xl bg-indigo-600 text-white flex items-center justify-center shadow-2xl shadow-indigo-200">
+        <Link href="/" className="flex items-center gap-3 group mb-12 transition-all">
+           <div className="w-12 h-12 rounded-2xl bg-slate-900 text-white flex items-center justify-center shadow-xl shadow-slate-100">
               <Home size={24} strokeWidth={2.5} />
            </div>
            <div>
-              <h1 className="text-xl font-black tracking-tighter text-slate-900 leading-none">NBTI</h1>
-              <p className="text-[10px] font-black text-indigo-500 uppercase tracking-tighter mt-1">Home Portal</p>
+              <h1 className="text-xl font-extrabold tracking-tighter text-slate-900 leading-none">NBTI</h1>
+              <p className="text-[10px] font-bold text-slate-300 uppercase tracking-tighter mt-1">Home Portal</p>
            </div>
         </Link>
 
         <div className="flex flex-col items-center mb-10">
-           <h1 className="text-4xl font-black text-slate-900 tracking-tighter mb-2 italic uppercase">SIGN <span className="text-indigo-600">UP</span></h1>
-           <p className="text-sm font-bold text-slate-400 break-keep">즉시 가입 가능한 스마트 회원가입 시스템입니다.</p>
+           <h1 className="text-4xl font-extrabold text-slate-900 tracking-tighter mb-2 uppercase">회원가입 <span className="text-slate-400">SIGN UP</span></h1>
+           <p className="text-sm font-bold text-slate-500 break-keep">즉시 가입 가능한 스마트 회원가입 시스템입니다.</p>
         </div>
 
         <form onSubmit={handleSignup} className="space-y-6">
           <div className="space-y-2">
-            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">이메일 주소 (Email Address)</label>
+            <label className="text-[10px] font-bold text-slate-300 uppercase tracking-widest ml-1">이메일 주소 (Email Address)</label>
             <div className="relative">
-              <Mail className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300" size={18} />
+              <Mail className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-200" size={18} />
               <input
                 type="email"
                 required
                 placeholder="nbti@example.com"
-                className="w-full pl-14 pr-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-50 outline-none transition-all"
+                className="w-full pl-14 pr-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-slate-50 outline-none transition-all"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
@@ -96,15 +96,15 @@ export default function SignupPage() {
           </div>
 
           <div className="space-y-2">
-            <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1">비밀번호 (Password)</label>
+            <label className="text-[10px] font-bold text-slate-300 uppercase tracking-widest ml-1">비밀번호 (Password)</label>
             <div className="relative">
-              <Lock className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-300" size={18} />
+              <Lock className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-200" size={18} />
               <input 
                 type="password" 
                 required
                 placeholder="6자 이상 입력"
                 minLength="6"
-                className="w-full pl-14 pr-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-50 outline-none transition-all"
+                className="w-full pl-14 pr-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-slate-50 outline-none transition-all"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
@@ -112,23 +112,23 @@ export default function SignupPage() {
           </div>
 
           {error && (
-            <div className="bg-rose-50 p-4 rounded-xl flex items-center gap-3 border border-rose-100">
-               <AlertCircle size={14} className="text-rose-500" />
-               <p className="text-rose-500 text-[11px] font-bold">{error}</p>
+            <div className="bg-slate-50 p-4 rounded-xl flex items-center gap-3 border border-slate-100">
+               <AlertCircle size={14} className="text-slate-900" />
+               <p className="text-slate-900 text-[11px] font-bold uppercase tracking-tighter">{error}</p>
             </div>
           )}
 
           <button 
             type="submit" 
             disabled={loading}
-            className="w-full bg-indigo-600 text-white py-5 rounded-2xl font-black flex items-center justify-center gap-3 hover:bg-indigo-700 transition-all shadow-xl shadow-indigo-200 mt-4 disabled:opacity-50"
+            className="w-full bg-slate-900 text-white py-5 rounded-2xl font-bold flex items-center justify-center gap-3 hover:bg-black transition-all shadow-xl shadow-slate-100 mt-4 disabled:opacity-50"
           >
             {loading ? '가입 처리 중...' : <><UserPlus size={20} /> 즉시 가입하기</>}
           </button>
         </form>
 
         <div className="mt-12 bg-slate-50 p-6 rounded-[2rem] border border-slate-100">
-           <p className="text-[10px] font-black text-indigo-600 uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
+           <p className="text-[10px] font-bold text-slate-900 uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
              <CheckCircle size={14} /> NBTI Instant Access
            </p>
            <ul className="space-y-3">
@@ -137,16 +137,16 @@ export default function SignupPage() {
                 '가입 즉시 나만의 대시보드 생성',
                 '전체 테스트 이력 자동 저장 및 분석',
               ].map((txt, i) => (
-                <li key={i} className="flex items-center gap-2 text-[11px] font-bold text-slate-500">
-                   <div className="w-1 h-1 bg-indigo-300 rounded-full" /> {txt}
+                <li key={i} className="flex items-center gap-2 text-[11px] font-bold text-slate-400">
+                   <div className="w-1 h-1 bg-slate-200 rounded-full" /> {txt}
                 </li>
               ))}
            </ul>
         </div>
       </div>
 
-      <footer className="mt-20 pb-20 text-[10px] font-black text-slate-200 uppercase tracking-[0.4em] italic leading-none">
-        NBTI AUTHENTICATION CENTER
+      <footer className="mt-20 pb-20 text-[10px] font-bold text-slate-200 uppercase tracking-[0.4em] leading-none">
+        NBTI 인증 센터
       </footer>
     </div>
   );

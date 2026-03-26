@@ -1,9 +1,33 @@
 'use client';
 
+/**
+ * [파일명: app/admin/ads/page.jsx]
+ * 기능: 캠페인 관리 – 2분할 구조 v10
+ * 좌열 (2/5): 제목 + 요약 카드 + 필터 + 신규 버튼
+ * 우열 (3/5): 캠페인 목록 카드 + 편집 모달
+ */
+
 import React, { useState, useEffect } from 'react';
-import { 
-  Megaphone, Plus, Power, Layout, Target, Link as LinkIcon, X, Edit2, Trash2, DollarSign, Image as ImageIcon, CreditCard
+import {
+  Megaphone, Plus, Target, Link as LinkIcon, X, Edit2, Trash2,
+  CheckCircle2, XCircle, Filter, LayoutDashboard, Layers
 } from 'lucide-react';
+
+const PLACEMENT_MAP = {
+  TEST_FIXED_TOP:    { no: '01', label: '상단 고정' },
+  TEST_FIXED_BOTTOM: { no: '02', label: '하단 고정' },
+  NATIVE_LIKERT:     { no: '03', label: '스텔스 문항' },
+  SPONSORED_LIKERT:  { no: '03', label: '스텔스 문항' },
+  STEALTH:           { no: '03', label: '스텔스 문항' },
+  LOADING_BANNER:    { no: '04', label: '로딩 화면' },
+  LOADING:           { no: '04', label: '로딩 화면' },
+  RESULT_TOP:        { no: '05', label: '결과 상단' },
+  RESULT_BOTTOM:     { no: '06', label: '결과 하단' },
+  MAIN_TOP:          { no: '07', label: '메인 홈' },
+  HOME_STATION:      { no: '07', label: '메인 홈' },
+};
+
+const getPlacement = (p) => PLACEMENT_MAP[p] || { no: '??', label: p };
 
 export default function AdsDashboard() {
   const [ads, setAds] = useState([]);
@@ -14,7 +38,8 @@ export default function AdsDashboard() {
   const [filterPlacement, setFilterPlacement] = useState('all');
 
   const [form, setForm] = useState({
-    brand_name: '', placement: 'LOADING', target_mbti: '', title: '', link_url: '', emoji_icon: '🛍️', target_test: 'all', cpc: 250,
+    brand_name: '', placement: 'TEST_FIXED_TOP', target_mbti: '',
+    title: '', link_url: '', target_test: 'all', cpc: 250,
     banner_img_url: '', pricing_model: 'CPC', daily_budget: 10000, ad_format: 'BANNER'
   });
 
@@ -37,7 +62,8 @@ export default function AdsDashboard() {
   function openNewModal() {
     setEditingId(null);
     setForm({
-      brand_name: '', placement: 'LOADING', target_mbti: '', title: '', link_url: '', emoji_icon: '🛍️', target_test: 'all', cpc: 250,
+      brand_name: '', placement: 'TEST_FIXED_TOP', target_mbti: '',
+      title: '', link_url: '', target_test: 'all', cpc: 250,
       banner_img_url: '', pricing_model: 'CPC', daily_budget: 10000, ad_format: 'BANNER'
     });
     setIsModalOpen(true);
@@ -46,16 +72,18 @@ export default function AdsDashboard() {
   function openEditModal(ad) {
     setEditingId(ad.ad_id);
     setForm({
-      brand_name: ad.brand_name || '', placement: ad.placement || 'LOADING', target_mbti: ad.target_mbti || '', title: ad.title || '', 
-      link_url: ad.link_url || '', emoji_icon: ad.emoji_icon || '🛍️', target_test: ad.target_test || 'all', cpc: ad.cpc || 250,
-      banner_img_url: ad.banner_img_url || '', pricing_model: ad.pricing_model || 'CPC', daily_budget: ad.daily_budget || 10000,
+      brand_name: ad.brand_name || '', placement: ad.placement || 'TEST_FIXED_TOP',
+      target_mbti: ad.target_mbti || '', title: ad.title || '',
+      link_url: ad.link_url || '', target_test: ad.target_test || 'all',
+      cpc: ad.cpc || 250, banner_img_url: ad.banner_img_url || '',
+      pricing_model: ad.pricing_model || 'CPC', daily_budget: ad.daily_budget || 10000,
       ad_format: ad.ad_format || 'BANNER'
     });
     setIsModalOpen(true);
   }
 
   async function deleteAd(id) {
-    if(!confirm('정말 이 캠페인을 삭제하시겠습니까? 데이터가 지워집니다.')) return;
+    if (!confirm('이 캠페인을 삭제하시겠습니까?')) return;
     await fetch(`/api/admin/ads?id=${id}`, { method: 'DELETE' });
     fetchAds();
   }
@@ -82,421 +110,247 @@ export default function AdsDashboard() {
     return true;
   });
 
+  const activeCount = ads.filter(a => a.is_active).length;
+  const inactiveCount = ads.filter(a => !a.is_active).length;
+
   return (
-    <div className="p-6 md:p-12 font-sans text-slate-900 mx-auto max-w-[1400px]">
-      <div className="flex justify-between items-end mb-10 border-b border-slate-100 pb-10">
-        <div>
-          <h1 className="text-4xl font-black tracking-tighter italic uppercase text-slate-900 flex items-center gap-4">
-            <Megaphone className="text-indigo-600" size={36}/> 스폰서 캠페인 관리
-          </h1>
-          <p className="text-slate-500 font-bold text-sm mt-2">B2B 광고주 배너 수주, 과금 모델(Pricing), 이미지 에셋 및 타겟팅 통합 제어 센터</p>
-        </div>
-        <button 
-          onClick={openNewModal}
-          className="px-8 py-4 bg-indigo-600 text-white rounded-[24px] font-black text-sm flex items-center gap-2 hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100"
-        >
-          <Plus size={20} /> 전문가용 새 캠페인 만들기
-        </button>
-      </div>
+    <div className="bg-[#fafafa] min-h-screen font-sans text-slate-900">
+      <div className="p-4 md:p-8 lg:p-10 mx-auto max-w-[1200px]">
 
-      {/* 워드프레스 스타일: 상단 필터 및 검색 바 */}
-      <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
-        {/* 상태 필터 탭 */}
-        <div className="flex items-center gap-4 text-sm font-bold">
-          <button 
-            onClick={() => setFilterStatus('all')}
-            className={`transition-colors ${filterStatus === 'all' ? 'text-indigo-600 font-black' : 'text-slate-500 hover:text-slate-700'}`}
-          >
-            전체 캠페인 ({ads.length})
-          </button>
-          <span className="text-slate-300">|</span>
-          <button 
-            onClick={() => setFilterStatus('active')}
-            className={`transition-colors ${filterStatus === 'active' ? 'text-emerald-600 font-black' : 'text-slate-500 hover:text-slate-700'}`}
-          >
-            발행됨 - 송출중 ({ads.filter(a => a.is_active).length})
-          </button>
-          <span className="text-slate-300">|</span>
-          <button 
-            onClick={() => setFilterStatus('inactive')}
-            className={`transition-colors ${filterStatus === 'inactive' ? 'text-slate-900 font-black' : 'text-slate-500 hover:text-slate-700'}`}
-          >
-            비활성화 - 임시보관 ({ads.filter(a => !a.is_active).length})
-          </button>
-        </div>
+        <div className="pt-8 grid grid-cols-1 lg:grid-cols-5 gap-8 items-start">
 
-        {/* 위치 필터 및 검색 */}
-        <div className="flex items-center gap-3 w-full md:w-auto">
-          <select 
-            className="p-2 border border-slate-200 rounded-lg text-sm bg-white text-slate-700 focus:outline-none focus:border-indigo-500"
-            value={filterPlacement}
-            onChange={(e) => setFilterPlacement(e.target.value)}
-          >
-            <option value="all">모든 구좌 (All Placements)</option>
-            <option value="TEST_FIXED_TOP">01 · 상단 고정 전광판 (프리미엄)</option>
-            <option value="TEST_FIXED_BOTTOM">02 · 하단 고정 스티키 320×50 (1순위)</option>
-            <option value="NATIVE_LIKERT">03 · 스텔스 테스트 (단독 문항)</option>
-            <option value="LOADING">04 · 문항 하단 줄광고 (브랜드 삽입)</option>
-            <option value="MAIN_TOP">05 · 메인 상단 앱 배너 (스티키)</option>
-            <option value="RESULT_TOP">06 · 결과 화면 상단 320×100</option>
-            <option value="RESULT_BOTTOM">07 · 결과 화면 하단 320×100</option>
-          </select>
+          {/* ══════════════════════════════
+              좌열: 제목 + 현황 + 필터
+          ══════════════════════════════ */}
+          <div className="lg:col-span-2 space-y-4 lg:sticky lg:top-10">
 
-          <input 
-            type="text" 
-            placeholder="브랜드명 또는 카피 검색..." 
-            className="p-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-indigo-500 w-full md:w-64 bg-white shadow-sm"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-          />
-        </div>
-      </div>
+            {/* 페이지 제목 */}
+            <div className="pb-5 border-b border-slate-200">
+              <p className="text-[12px] font-black text-slate-400 uppercase tracking-[0.4em] mb-1.5 leading-none">Campaign Administration</p>
+              <h1 className="text-2xl font-black tracking-tighter uppercase text-slate-900 leading-none">캠페인 관리</h1>
+            </div>
 
-      {/* 리스트 뷰형 테이블 */}
-      <div className="bg-white rounded-[32px] border border-slate-200 shadow-sm overflow-hidden mb-12">
-        <table className="w-full text-left border-collapse">
-          <thead>
-            <tr className="bg-slate-50 border-b border-slate-100 text-xs font-black text-slate-400 uppercase tracking-widest">
-              <th className="py-6 px-8 rounded-tl-[32px]">광고 송출 상태</th>
-              <th className="py-6 px-8">스폰서 (브랜드)</th>
-              <th className="py-6 px-8">광고 카피 및 배너 URL</th>
-              <th className="py-6 px-8 flex flex-col">광고 조건 <span>(타겟팅 / 과금 모델 / 예산)</span></th>
-              <th className="py-6 px-8 rounded-tr-[32px] text-right">관리 액션</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-100">
-            {filteredAds.map((ad) => (
-              <tr key={ad.ad_id} className={`transition-all hover:bg-slate-50/50 group ${!ad.is_active && 'opacity-60 bg-slate-50/30'}`}>
-                {/* 1. 활성 상태 (전원 스위치) */}
-                <td className="py-6 px-8 w-40">
-                  <button 
-                    onClick={() => toggleStatus(ad.ad_id, ad.is_active)}
-                    title={ad.is_active ? '크게 끄기' : '크게 켜기'}
-                    className={`flex items-center justify-center gap-2 px-4 py-2 w-full rounded-full text-xs font-black tracking-widest uppercase transition-all shadow-sm border ${ad.is_active ? 'bg-indigo-50 border-indigo-200 text-indigo-600' : 'bg-white border-slate-200 text-slate-400 hover:border-slate-300'}`}
+            {/* 요약 3카드 */}
+            <div className="grid grid-cols-3 gap-2">
+              {[
+                { label: '전체', value: ads.length, icon: Megaphone },
+                { label: '활성', value: activeCount, icon: CheckCircle2 },
+                { label: '비활성', value: inactiveCount, icon: XCircle },
+              ].map((s, i) => (
+                <div key={i} className="bg-white p-3 rounded-xl border border-slate-100 shadow-sm text-center hover:border-slate-300 transition-all group">
+                  <div className="w-7 h-7 bg-slate-50 rounded-lg flex items-center justify-center mx-auto mb-2 group-hover:bg-slate-900 group-hover:text-white transition-all">
+                    <s.icon size={14} />
+                  </div>
+                  <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest leading-none mb-1">{s.label}</p>
+                  <p className="text-base font-black text-slate-900 tracking-tighter leading-none">{s.value}</p>
+                </div>
+              ))}
+            </div>
+
+            {/* 신규 등록 버튼 */}
+            <button
+              onClick={openNewModal}
+              className="w-full py-3.5 bg-slate-900 text-white rounded-xl font-black text-[13px] flex items-center justify-center gap-2 hover:bg-black transition-all shadow-sm active:scale-95 uppercase tracking-widest"
+            >
+              <Plus size={15} strokeWidth={2.5} /> 신규 캠페인 등록
+            </button>
+
+            {/* 검색 */}
+            <div>
+              <input
+                type="text"
+                placeholder="브랜드 또는 타이틀 검색..."
+                className="w-full px-4 py-3 bg-white border border-slate-100 rounded-xl text-[13px] font-bold outline-none focus:ring-2 focus:ring-slate-900 shadow-sm transition-all"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+            </div>
+
+            {/* 상태 필터 */}
+            <div className="bg-white p-4 rounded-xl border border-slate-100 shadow-sm space-y-2">
+              <p className="text-[11px] font-black text-slate-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+                <Filter size={12} /> 필터
+              </p>
+              <div className="flex gap-2">
+                {[
+                  { val: 'all', label: '전체' },
+                  { val: 'active', label: 'ON' },
+                  { val: 'inactive', label: 'OFF' },
+                ].map(f => (
+                  <button
+                    key={f.val}
+                    onClick={() => setFilterStatus(f.val)}
+                    className={`flex-1 py-2 rounded-lg text-[12px] font-black uppercase tracking-wider transition-all ${filterStatus === f.val ? 'bg-slate-900 text-white' : 'bg-slate-50 text-slate-400 hover:bg-slate-100'}`}
                   >
-                    <div className={`w-2 h-2 rounded-full ${ad.is_active ? 'bg-indigo-500 animate-pulse' : 'bg-slate-300'}`} />
-                    {ad.is_active ? 'ON 켜짐' : 'OFF 꺼짐'}
+                    {f.label}
                   </button>
-                </td>
+                ))}
+              </div>
+              <select
+                value={filterPlacement}
+                onChange={(e) => setFilterPlacement(e.target.value)}
+                className="w-full px-3 py-2.5 bg-slate-50 border-none rounded-lg font-black text-[12px] text-slate-700 outline-none"
+              >
+                <option value="all">구좌: 전체</option>
+                <option value="TEST_FIXED_TOP">01 - 상단 고정</option>
+                <option value="TEST_FIXED_BOTTOM">02 - 하단 고정</option>
+                <option value="NATIVE_LIKERT">03 - 스텔스 문항</option>
+                <option value="LOADING_BANNER">04 - 로딩 화면</option>
+                <option value="RESULT_TOP">05 - 결과 상단</option>
+                <option value="RESULT_BOTTOM">06 - 결과 하단</option>
+                <option value="MAIN_TOP">07 - 메인 홈</option>
+              </select>
+            </div>
+          </div>
 
-                {/* 2. 브랜드명 및 썸네일 */}
-                <td className="py-6 px-8 min-w-[200px]">
-                  <div className="flex items-center gap-4">
-                    {ad.banner_img_url ? (
-                       <img src={ad.banner_img_url} className="w-14 h-14 object-cover rounded-2xl border border-slate-200 shadow-sm" alt="배너 썸네일"/>
-                    ) : (
-                       <span className="text-3xl bg-slate-50 w-14 h-14 rounded-2xl flex items-center justify-center border border-slate-100 shadow-inner group relative">
-                         {ad.emoji_icon}
-                         <span className="opacity-0 group-hover:opacity-100 absolute -top-8 bg-slate-800 text-white text-[10px] px-2 py-1 rounded-md transition-opacity">이모지 전용</span>
-                       </span>
-                    )}
-                    <div>
-                      <span className="font-black text-slate-800 tracking-wide text-lg block">{ad.brand_name}</span>
-                      <span className="text-xs font-bold text-slate-400">ID: {ad.ad_id.split('-')[0]}</span>
-                    </div>
-                  </div>
-                </td>
+          {/* ══════════════════════════════
+              우열: 캠페인 목록
+          ══════════════════════════════ */}
+          <div className="lg:col-span-3 min-h-[60vh] pb-16">
 
-                {/* 3. 카피 문구 및 링크 */}
-                <td className="py-6 px-8 max-w-[300px]">
-                  <p className="font-bold text-slate-900 leading-snug w-full whitespace-pre-wrap text-sm" title={ad.title}>{ad.title}</p>
-                  <div className="flex items-center gap-1 mt-2 text-[10px] font-bold text-indigo-400 truncate w-full bg-indigo-50/50 p-1.5 rounded-lg border border-indigo-100/50" title={ad.link_url || '링크 없음'}>
-                    <LinkIcon size={12}/> {ad.link_url || '아웃바운드 링크 연결 없음 (노출 전용)'}
-                  </div>
-                </td>
-
-                {/* 4. 과금 및 타겟 배치 모델 */}
-                <td className="py-6 px-8 w-[280px]">
-                  <div className="flex flex-col gap-2">
-                    <div className="flex gap-2 mb-2">
-                       <span className={`inline-flex items-center gap-1.5 ${ad.ad_format === 'NATIVE_LIKERT' ? 'bg-amber-50 text-amber-700' : (ad.ad_format === 'SPONSORED_LIKERT' ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-600')} text-[10px] font-black px-2.5 py-1 rounded-md uppercase tracking-widest w-max`}>
-                        <Layout size={12}/>
-                        {ad.ad_format === 'NATIVE_LIKERT' ? '네이티브 위장' : (ad.ad_format === 'SPONSORED_LIKERT' ? '공식 스폰서형' : '전용 띠배너')}
-                      </span>
-                      <span className="inline-flex items-center gap-1.5 bg-indigo-50 text-indigo-700 text-[10px] font-black px-2.5 py-1 rounded-md uppercase tracking-widest w-max">
-                        <Target size={12}/>
-                        {ad.target_test === 'all' ? '전체 (All)' : (ad.target_test === 'basic' ? '일반 종합' : (ad.target_test === 'love' ? '연애 전용' : (ad.target_test === 'job' ? '직장 전용' : '스피드 28문항')))}
-                      </span>
-                    </div>
-                    
-                    <div className="flex items-center gap-2 mt-2">
-                      <span className="inline-flex items-center gap-1 bg-yellow-50 text-yellow-700 border border-yellow-200/50 text-[10px] font-black px-2.5 py-1 rounded-md uppercase tracking-widest w-max">
-                        <CreditCard size={12}/> {ad.pricing_model} ({ad.cpc}원)
-                      </span>
-                      <span className="text-[10px] font-bold text-slate-400">/ 일일 {Number(ad.daily_budget).toLocaleString()}원 한도 (노출제한)</span>
-                    </div>
-
-                    <div className="mt-3 bg-slate-100 rounded-full h-2.5 w-full overflow-hidden relative" title={`오늘 광고주 소진액: ${ad.spent_today?.toLocaleString()}원 / 총 예산: ${Number(ad.daily_budget).toLocaleString()}원`}>
-                       <div className={`h-full rounded-full transition-all duration-1000 ${ad.spent_today >= ad.daily_budget ? 'bg-red-500' : 'bg-emerald-500'}`} style={{ width: `${Math.min((ad.spent_today / (ad.daily_budget || 1)) * 100, 100)}%` }} />
-                    </div>
-                    <div className="flex justify-between items-center mt-1 px-1">
-                      <span className="text-[10px] font-black text-slate-400">{ad.today_clicks} 클릭 발생</span>
-                      <span className={`text-[10px] font-black ${ad.spent_today >= ad.daily_budget ? 'text-red-500' : 'text-emerald-600'}`}>₩{ad.spent_today?.toLocaleString()} 소진</span>
-                    </div>
-                  </div>
-                </td>
-
-                {/* 5. 메뉴 (액션) */}
-                <td className="py-6 px-8">
-                  <div className="flex items-center justify-end gap-2">
-                    <button 
-                      onClick={() => openEditModal(ad)}
-                      className="p-3 bg-white border border-slate-200 rounded-xl text-slate-400 hover:text-indigo-600 hover:border-indigo-300 hover:bg-indigo-50 hover:shadow-md transition-all"
-                      title="캠페인 수정 / 상세 에디터"
+            {filteredAds.length === 0 ? (
+              <div className="h-full min-h-[300px] flex flex-col items-center justify-center bg-white rounded-xl border border-slate-100 shadow-sm p-12 text-center">
+                <div className="w-14 h-14 bg-slate-50 rounded-2xl flex items-center justify-center mb-4">
+                  <Megaphone size={24} className="text-slate-300" />
+                </div>
+                <p className="text-[13px] font-black text-slate-900 uppercase tracking-widest mb-2">캠페인 없음</p>
+                <p className="text-[12px] font-bold text-slate-400">신규 캠페인을 등록하거나 필터를 조정하세요</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {filteredAds.map(ad => {
+                  const p = getPlacement(ad.placement);
+                  return (
+                    <div
+                      key={ad.ad_id}
+                      className="bg-white p-5 rounded-xl border border-slate-100 shadow-sm hover:border-slate-300 transition-all group"
                     >
-                      <Edit2 size={16} />
-                    </button>
-                    <button 
-                      onClick={() => deleteAd(ad.ad_id)}
-                      className="p-3 bg-white border border-slate-200 rounded-xl text-slate-400 hover:text-red-500 hover:border-red-300 hover:bg-red-50 hover:shadow-md transition-all"
-                      title="데이터베이스 영구 삭제"
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-            {filteredAds.length === 0 && (
-              <tr>
-                <td colSpan="5" className="py-20 text-center text-slate-400 font-bold text-sm bg-slate-50/50">
-                  <Megaphone size={48} className="mx-auto text-slate-300 mb-4" />
-                  검색 조건에 일치하는 캠페인이 없습니다.
-                </td>
-              </tr>
+                      <div className="flex items-start justify-between gap-4">
+                        {/* 왼쪽: 번호 + 정보 */}
+                        <div className="flex items-start gap-4 flex-1 min-w-0">
+                          <div className="w-10 h-10 bg-slate-900 text-white rounded-xl flex items-center justify-center font-black text-[14px] shrink-0">
+                            {p.no}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1 flex-wrap">
+                              <span className="font-black text-[14px] text-slate-900 truncate">{ad.brand_name}</span>
+                              <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{p.label}</span>
+                            </div>
+                            <p className="text-[13px] font-bold text-slate-500 truncate">{ad.title}</p>
+                            <p className="text-[10px] font-black text-slate-300 uppercase tracking-wider mt-1">{ad.ad_id?.slice(0, 12)}...</p>
+                          </div>
+                        </div>
+                        {/* 오른쪽: 상태 + 액션 */}
+                        <div className="flex items-center gap-2 shrink-0">
+                          <button
+                            onClick={() => toggleStatus(ad.ad_id, ad.is_active)}
+                            className={`px-3 py-1.5 rounded-lg text-[11px] font-black tracking-widest uppercase transition-all ${ad.is_active ? 'bg-slate-900 text-white shadow-sm' : 'bg-slate-100 text-slate-400 hover:bg-slate-200'}`}
+                          >
+                            {ad.is_active ? 'ON' : 'OFF'}
+                          </button>
+                          <button
+                            onClick={() => openEditModal(ad)}
+                            className="p-2 text-slate-400 hover:text-slate-900 hover:bg-slate-50 rounded-lg transition-all"
+                          >
+                            <Edit2 size={15} strokeWidth={1.5} />
+                          </button>
+                          <button
+                            onClick={() => deleteAd(ad.ad_id)}
+                            className="p-2 text-slate-400 hover:text-red-400 hover:bg-red-50 rounded-lg transition-all"
+                          >
+                            <Trash2 size={15} strokeWidth={1.5} />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             )}
-          </tbody>
-        </table>
+          </div>
+        </div>
       </div>
 
-      {/* 🚀 라이브 프리뷰 인스펙터 지원 초대형 에디터 모달 */}
+      {/* ── 등록/편집 모달 ── */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-[100] bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 lg:p-10">
-           <div className="bg-white w-full max-w-6xl h-[90vh] rounded-[48px] relative shadow-2xl flex overflow-hidden">
-             
-             {/* 즉시 닫기 X 버튼 */}
-             <button 
-                onClick={() => setIsModalOpen(false)} 
-                className="absolute top-6 right-6 lg:top-8 lg:right-8 p-3 bg-white/80 hover:bg-slate-100 text-slate-400 hover:text-slate-700 rounded-full z-50 backdrop-blur-md shadow-sm border border-slate-100 transition-all hover:rotate-90"
-             >
-                <X size={24} />
-             </button>
+        <div className="fixed inset-0 z-[100] bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white w-full max-w-lg rounded-xl shadow-2xl overflow-hidden border border-slate-200">
+            <div className="p-6 bg-slate-900 text-white flex justify-between items-center">
+              <div>
+                <h2 className="text-[15px] font-black tracking-tighter leading-none uppercase">
+                  {editingId ? 'Edit Campaign' : 'New Campaign'}
+                </h2>
+                <p className="text-[11px] font-black text-slate-500 uppercase tracking-widest mt-0.5">Master Administration Unit</p>
+              </div>
+              <button onClick={() => setIsModalOpen(false)} className="text-white/40 hover:text-white transition-colors">
+                <X size={20} />
+              </button>
+            </div>
 
-             {/* Left: 입력 폼 구역 */}
-             <div className="w-1/2 p-12 overflow-y-auto custom-scrollbar border-r border-slate-100 flex flex-col justify-between">
-               <div>
-                  <div className="flex items-center justify-between mb-10">
-                    <h2 className="text-3xl font-black text-slate-900 flex items-center gap-3 tracking-tighter">
-                      <Edit2 className="text-indigo-500" /> {editingId ? '캠페인 내용 수정' : '새 광고 생성'}
-                    </h2>
-                    <span className="bg-slate-100 text-slate-500 text-xs font-bold px-3 py-1 rounded-full border border-slate-200">
-                      B2B 파트너 스튜디오
-                    </span>
-                  </div>
-                 
-                 <div className="space-y-6 flex-1 pt-2">
-                    {/* 광고 구좌 및 포맷 셀렉터 */}
-                    <div className="bg-slate-50 p-6 rounded-3xl border border-slate-100">
-                      <h3 className="text-sm font-black text-slate-800 mb-4 flex items-center gap-2"><Layout size={16}/> 1. 광고 송출 구좌 및 포맷 선택</h3>
-                      <div className="mb-6">
-                        <p className="text-xs font-bold text-slate-500 ml-2 mb-1.5">구좌 위치 (어디에 노출할 것인가요?)</p>
-                        <select 
-                          className="w-full p-4 bg-white border border-slate-200 rounded-2xl outline-none font-bold text-sm text-slate-700 shadow-sm" 
-                          value={form.placement} 
-                          onChange={e => {
-                            const val = e.target.value;
-                            const format = val === 'NATIVE_LIKERT' ? 'NATIVE_LIKERT' : 'BANNER';
-                            setForm({...form, placement: val, ad_format: format});
-                          }}
-                        >
-                            <option value="TEST_FIXED_TOP">01 · 상단 고정 전광판 (프리미엄 | CPM)</option>
-                           <option value="TEST_FIXED_BOTTOM">02 · 하단 고정 스티키 320×50 (1순위 | CPM)</option>
-                           <option value="NATIVE_LIKERT">03 · 스텔스 테스트 (단독 문항 | CPA)</option>
-                           <option value="LOADING">04 · 문항 하단 줄광고 (브랜드 삽입 | CPC)</option>
-                           <option value="MAIN_TOP">05 · 메인 상단 앱 배너 스티키 (CPC/CPM)</option>
-                           <option value="RESULT_TOP">06 · 결과 화면 상단 320×100 (CPC/CPM)</option>
-                           <option value="RESULT_BOTTOM">07 · 결과 화면 하단 320×100 (커머스 전환)</option>
-                        </select>
-                      </div>
-                      <p className="text-xs font-bold text-slate-500 ml-2 mb-1.5">광고 송출 포맷 (어떤 형태로 노출할 것인가요?)</p>
-                      <div className="flex gap-3">
-                        <label className={`flex-1 p-3 border rounded-2xl cursor-pointer transition-all ${form.ad_format === 'BANNER' ? 'border-indigo-500 bg-indigo-50/50 shadow-md ring-2 ring-indigo-500/20' : 'border-slate-200 bg-white hover:border-slate-300'}`} onClick={() => setForm({...form, ad_format: 'BANNER'})}>
-                          <span className="block text-sm font-black text-slate-800 mb-1">디스플레이 띠배너</span>
-                          <span className="block text-[10px] text-slate-500 font-bold leading-snug">이미지로 승부 (카피 불필요)</span>
-                        </label>
-                        <label className={`flex-1 p-3 border rounded-2xl cursor-pointer transition-all ${form.ad_format === 'SPONSORED_LIKERT' ? 'border-emerald-500 bg-emerald-50/50 shadow-md ring-2 ring-emerald-500/20' : 'border-slate-200 bg-white hover:border-slate-300'}`} onClick={() => setForm({...form, ad_format: 'SPONSORED_LIKERT'})}>
-                          <span className="block text-sm font-black text-slate-800 mb-1">공식 스폰서 문항</span>
-                          <span className="block text-[10px] text-slate-500 font-bold leading-snug">대형 브랜드 후원 라벨표와 함께 노출</span>
-                        </label>
-                        <label className={`flex-1 p-3 border rounded-2xl cursor-pointer transition-all ${form.ad_format === 'NATIVE_LIKERT' ? 'border-amber-500 bg-amber-50/50 shadow-md ring-2 ring-amber-500/20' : 'border-slate-200 bg-white hover:border-slate-300'}`} onClick={() => setForm({...form, ad_format: 'NATIVE_LIKERT'})}>
-                          <span className="block text-sm font-black text-slate-800 mb-1">네이티브 문항 침투</span>
-                          <span className="block text-[10px] text-slate-500 font-bold leading-snug">일반 테스트인 것처럼 100% 위장</span>
-                        </label>
-                      </div>
-                    </div>
-
-                    {/* 브랜딩 기초 */}
-                    <div className="bg-slate-50 p-6 rounded-3xl border border-slate-100">
-                       <h3 className="text-sm font-black text-slate-800 mb-4 flex items-center gap-2"><Edit2 size={16}/> 2. 디스플레이 기초 카피 정보</h3>
-                       <div className="grid grid-cols-2 gap-4">
-                         <div>
-                            <p className="text-xs font-bold text-slate-500 ml-2 mb-1.5">클라이언트 (브랜드명)</p>
-                            <input placeholder="예: 무신사, 넷플릭스" className="w-full p-4 bg-white rounded-2xl border border-slate-200 focus:border-indigo-500 outline-none font-bold text-sm shadow-sm" value={form.brand_name} onChange={e => setForm({...form, brand_name: e.target.value})} />
-                         </div>
-                         <div>
-                            <p className="text-xs font-bold text-slate-500 ml-2 mb-1.5">이모지 (이미지 없을 시 대체)</p>
-                            <input className="w-full p-4 bg-white rounded-2xl border border-slate-200 focus:border-indigo-500 outline-none font-black text-sm text-center shadow-sm" value={form.emoji_icon} onChange={e => setForm({...form, emoji_icon: e.target.value})} maxLength={8} />
-                         </div>
-                       </div>
-                       
-                       {form.ad_format !== 'BANNER' && (
-                         <>
-                           <p className="text-xs font-bold text-slate-500 ml-2 mt-4 mb-1.5">심리 테스트형 노출 문구 (질문으로 위장)</p>
-                           <textarea placeholder="예: 무의식적으로 새우깡의 바삭함을 찾게 될 때가 있다." className="w-full p-4 bg-white rounded-2xl border border-slate-200 focus:border-indigo-500 outline-none font-bold text-sm h-20 resize-none shadow-sm leading-relaxed" value={form.title} onChange={e => setForm({...form, title: e.target.value})} />
-                         </>
-                       )}
-                    </div>
-
-                    {/* 랜딩 및 이미지 배너 자산 */}
-                    <div className="bg-slate-50 p-6 rounded-3xl border border-slate-100 shadow-inner">
-                      <h3 className="text-sm font-black text-slate-800 mb-4 flex items-center gap-2"><ImageIcon size={16}/> 3. 미디어 및 아웃바운드 링크 설정</h3>
-                      <div className="mb-4">
-                        <p className="text-xs font-bold text-slate-500 ml-2 mb-1">디스플레이 배너 이미지 URL 주소</p>
-                         <p className="text-[10px] font-black tracking-widest text-amber-600 mb-2 ml-2 bg-amber-100 w-max px-2 py-1 rounded-md">
-                           권장 규격: {
-                             form.placement === 'TEST_FIXED_BOTTOM' ? '320×50 (모바일 스티키 표준)' :
-                             form.placement === 'RESULT_TOP' || form.placement === 'RESULT_BOTTOM' ? '320×100 (Large Mobile Banner)' :
-                             form.placement === 'MAIN_TOP' ? '375×100 (전체 페이지 상단 고정 대형 배너)' :
-                             '600×300 (2:1 와이드 IAB 표준)'
-                           }
-                         </p>
-                        <input type="text" placeholder="https://image-url.com/banner.jpg" className="w-full p-4 bg-white rounded-2xl border border-slate-200 focus:border-amber-500 outline-none font-bold text-sm text-lime-900 shadow-sm" value={form.banner_img_url} onChange={e => setForm({...form, banner_img_url: e.target.value})} />
-                      </div>
-                      
-                      <p className="text-xs font-bold text-slate-500 ml-2 mb-1.5">최종 아웃바운드 클릭 URL (방문하기)</p>
-                      <input type="text" placeholder="https://..." className="w-full p-4 bg-white border border-slate-200 rounded-2xl focus:border-emerald-500 outline-none font-bold text-sm text-emerald-700 shadow-sm" value={form.link_url} onChange={e => setForm({...form, link_url: e.target.value})} />
-                    </div>
-
-                    <div className="bg-slate-50 p-6 rounded-3xl border border-slate-100">
-                       <h3 className="text-sm font-black text-slate-800 mb-4 flex items-center gap-2"><CreditCard size={16}/> 4. 타겟팅 및 상업 (과금) 조건</h3>
-                       <div className="grid grid-cols-1 gap-4 mb-4">
-                         <div>
-                           <p className="text-xs font-bold text-slate-500 ml-2 mb-1.5">노출 타겟팅 (Target)</p>
-                           <select className="w-full p-4 bg-white border border-slate-200 rounded-2xl outline-none font-bold text-sm text-slate-700 shadow-sm" value={form.target_test} onChange={e => setForm({...form, target_test: e.target.value})}>
-                              <option value="all">모든 테스트 통합 (프리미엄 노출)</option>
-                              <option value="basic">일반(종합) 심리 테스트 전용</option>
-                              <option value="love">연애 세포 테스트 전용</option>
-                              <option value="job">직장 생활 테스트 전용</option>
-                              <option value="dynamic">스피드(다이나믹) 28문항 전용</option>
-                           </select>
-                         </div>
-                       </div>
-                       
-                       <div className="grid grid-cols-3 gap-4">
-                         <div>
-                           <p className="text-xs font-bold text-slate-500 ml-2 mb-1.5">단가 모델</p>
-                           <select className="w-full p-4 py-3.5 bg-white border border-slate-200 rounded-2xl outline-none font-bold text-sm shadow-sm" value={form.pricing_model} onChange={e => setForm({...form, pricing_model: e.target.value})}>
-                              <option value="CPC">CPC (클릭)</option>
-                              <option value="CPM">CPM (노출)</option>
-                              <option value="FIXED">고정(월)</option>
-                           </select>
-                         </div>
-                         <div>
-                           <p className="text-xs font-bold text-slate-500 ml-2 mb-1.5">거래 단가액 (₩)</p>
-                           <input type="number" className="w-full p-4 py-3.5 bg-white border border-slate-200 rounded-2xl outline-none font-black text-sm text-indigo-600 shadow-sm" value={form.cpc} onChange={e => setForm({...form, cpc: Number(e.target.value)})} />
-                         </div>
-                         <div>
-                           <p className="text-xs font-bold text-slate-500 ml-2 mb-1.5">일일 예산 한도</p>
-                           <input type="number" className="w-full p-4 py-3.5 bg-white border border-slate-200 rounded-2xl outline-none font-black text-sm text-red-600 shadow-sm" value={form.daily_budget} onChange={e => setForm({...form, daily_budget: Number(e.target.value)})} />
-                         </div>
-                       </div>
-                    </div>
-                 </div>
-               </div>
-               
-               <div className="flex gap-4 mt-8 pt-8 border-t border-slate-100 bg-white">
-                 <button onClick={() => setIsModalOpen(false)} className="w-1/3 py-5 bg-slate-100 text-slate-500 rounded-[24px] font-black text-lg hover:bg-slate-200 transition-all">
-                   취소
-                 </button>
-                 <button onClick={submitAd} className="w-2/3 py-5 bg-indigo-600 text-white rounded-[24px] font-black text-lg shadow-2xl shadow-indigo-200 hover:bg-indigo-700 transition-all">
-                   {editingId ? '수정된 정보 덮어쓰기' : '런칭 및 활성화 승인'}
-                 </button>
-               </div>
-             </div>
-
-             {/* Right: 실시간 렌더링 프리뷰 구역 (Live Render) */}
-             <div className="w-1/2 bg-slate-100 p-12 overflow-y-auto flex flex-col items-center relative custom-scrollbar">
-                <div className="absolute top-6 right-10 flex items-center gap-2">
-                   <div className="w-2 h-2 bg-red-400 rounded-full animate-pulse"/>
-                   <span className="text-[10px] font-black text-slate-400 tracking-widest">LIVE PREVIEW</span>
+            <div className="p-6 space-y-4">
+              {[
+                { label: '브랜드명', key: 'brand_name', placeholder: 'BRAND ID', type: 'text' },
+                { label: '캠페인 타이틀', key: 'title', placeholder: '캠페인 타이틀 입력', type: 'text' },
+              ].map(f => (
+                <div key={f.key} className="space-y-1">
+                  <label className="text-[11px] font-black uppercase text-slate-400 ml-1">{f.label}</label>
+                  <input
+                    type={f.type}
+                    className="w-full px-4 py-2.5 bg-slate-50 border border-slate-100 rounded-lg font-bold text-[13px] focus:ring-1 focus:ring-slate-900 transition-all outline-none"
+                    value={form[f.key]}
+                    onChange={(e) => setForm({ ...form, [f.key]: e.target.value })}
+                    placeholder={f.placeholder}
+                  />
                 </div>
-                
-                <h3 className="text-xl font-black text-slate-800 mb-8 self-start w-full opacity-60">실제 고객에게 노출되는 형태</h3>
-                
-                {/* 1. 슬라이더(매복) 뷰 시뮬레이터 */}
-                <div className="w-full max-w-[400px] bg-white rounded-[32px] p-8 shadow-xl mt-6 relative pb-16 transform hover:scale-[1.02] transition-transform">
-                  <div className="absolute -top-3 -right-3 bg-indigo-600 text-white text-[10px] font-black px-3 py-1 rounded-full shadow-lg">모바일 스마트폰 뷰</div>
-                  
-                  {form.ad_format === 'SPONSORED_LIKERT' ? (
-                    <div className="bg-emerald-50 border border-emerald-200 p-4 rounded-xl mb-4 w-full text-center relative overflow-hidden shadow-inner">
-                      <div className="absolute top-0 right-0 bg-emerald-500 text-white text-[9px] font-black px-2 py-0.5 rounded-bl-lg">SPONSORED CAMPAIGN</div>
-                      <span className="text-emerald-700 font-black text-xs tracking-widest mb-1 block">
-                        {form.brand_name || '브랜드명'} 제휴 파트너
-                      </span>
-                      <h2 className="text-lg md:text-xl font-bold text-slate-800 leading-snug break-keep min-h-[4rem] px-2 w-full whitespace-pre-wrap mt-2">
-                        {form.title || '공식 스폰서 광고 메시지 입력 시 표출'}
-                      </h2>
-                    </div>
-                  ) : (
-                    <>
-                      <span className="text-indigo-600 font-black text-xs tracking-widest mb-3 block text-center">
-                        QUESTION X
-                      </span>
-                      <h2 className="text-xl font-bold text-gray-800 leading-snug break-keep text-center whitespace-pre-wrap mb-4 px-4 min-h-[3rem]">
-                        {form.ad_format === 'NATIVE_LIKERT' ? (form.title || '광고 메시지 입력 시 문항 내용으로 완전히 위장 표출') : '오리지널 진짜 심리 테스트 문항이 이 부분에 기본 표출됩니다.'}
-                      </h2>
-                    </>
-                  )}
+              ))}
 
-                  {/* 배너 렌더링 시뮬레이터 (BANNER 포맷일때만 보임) */}
-                  { form.ad_format === 'BANNER' && (form.link_url || form.banner_img_url) && (
-                    <div className="mt-4 mb-2 block w-[95%] bg-white border border-slate-200 rounded-xl p-3 shadow-sm mx-auto relative overflow-hidden">
-                      <div className="absolute top-0 right-0 bg-slate-200/80 text-[8px] text-slate-500 font-black px-1.5 py-0.5 rounded-bl-lg backdrop-blur-sm z-10">스폰서 광고</div>
-                      
-                      {form.banner_img_url && (
-                        <div className="w-full aspect-[2/1] mb-3 bg-slate-100 rounded-lg overflow-hidden border border-slate-200 flex items-center justify-center">
-                          <img src={form.banner_img_url} className="w-full h-full object-cover" alt="미리보기 배너" 
-                               onError={(e) => { e.target.src="https://via.placeholder.com/600x300?text=Invalid+Ratio+Or+URL"; }}/>
-                        </div>
-                      )}
-                      
-                      <div className="flex items-center justify-between font-bold px-1">
-                         <span className="text-slate-600 text-[12px] truncate pr-2 max-w-[70%]">공식 브랜드 웹사이트 알아보기</span>
-                         <span className="text-indigo-500 text-[10px] group-hover:underline">방문하기 ↗</span>
-                      </div>
-                    </div>
-                  )}
+              <div className="space-y-1">
+                <label className="text-[11px] font-black uppercase text-slate-400 ml-1">상품 번호</label>
+                <select
+                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-100 rounded-lg font-bold text-[13px] outline-none"
+                  value={form.placement}
+                  onChange={(e) => setForm({ ...form, placement: e.target.value })}
+                >
+                  <option value="TEST_FIXED_TOP">01 - 상단 고정</option>
+                  <option value="TEST_FIXED_BOTTOM">02 - 하단 고정</option>
+                  <option value="NATIVE_LIKERT">03 - 스텔스 문항</option>
+                  <option value="LOADING_BANNER">04 - 로딩 화면</option>
+                  <option value="RESULT_TOP">05 - 결과 상단</option>
+                  <option value="RESULT_BOTTOM">06 - 결과 하단</option>
+                  <option value="MAIN_TOP">07 - 메인 홈</option>
+                </select>
+              </div>
 
-                  {/* 가상의 가짜 서베이 버튼스 */}
-                  <div className="w-full mt-6 opacity-30 pointer-events-none">
-                     <div className="w-[80%] mx-auto h-0.5 bg-slate-200 mb-6 absolute top-[75%] left-[10%] -z-10"/>
-                     <div className="flex justify-between items-center px-4 mt-8">
-                       {[...Array(7)].map((_, i) => <div key={i} className={`w-8 h-8 rounded-full border-2 border-slate-300 ${i===3 && 'bg-slate-200'}`} />)}
-                     </div>
-                  </div>
+              <div className="space-y-1">
+                <label className="text-[11px] font-black uppercase text-slate-400 ml-1">랜딩 URL</label>
+                <div className="relative">
+                  <LinkIcon size={13} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-300" />
+                  <input
+                    type="text"
+                    className="w-full pl-9 pr-4 py-2.5 bg-slate-50 border border-slate-100 rounded-lg font-bold text-[13px] outline-none"
+                    value={form.link_url}
+                    onChange={(e) => setForm({ ...form, link_url: e.target.value })}
+                    placeholder="https://..."
+                  />
                 </div>
+              </div>
+            </div>
 
-                <div className="mt-8 text-center bg-white/50 backdrop-blur-sm px-6 py-4 rounded-3xl border border-slate-200 w-full max-w-[400px]">
-                   <p className="text-[11px] font-bold text-slate-500 leading-relaxed text-left">
-                     <span className="text-indigo-600 block mb-1">💡 B2B 영업 팁:</span>
-                     현재 작성된 이 캠페인은 <strong className="text-slate-800">{form.target_test === 'all' ? '모든 유저' : form.target_test}</strong>에게 배포되며, 
-                     광고주({form.brand_name || '브랜드명 미입력'})와 <strong className="text-slate-800">{form.pricing_model}</strong> 형태로 단가 <strong className="text-slate-800">{form.cpc}원</strong>에 계약되었습니다. 
-                     일일 최대 노출(클릭) 한도 소진치인 <strong className="text-red-500">{form.daily_budget}원</strong> 도달 시 즉시 임시 중단됩니다.
-                   </p>
-                </div>
-             </div>
-
-           </div>
+            <div className="p-5 bg-slate-50 border-t border-slate-100 flex gap-2">
+              <button
+                onClick={() => setIsModalOpen(false)}
+                className="flex-1 py-2.5 bg-white text-slate-400 font-black rounded-lg hover:bg-slate-100 transition-all text-[13px] uppercase tracking-widest"
+              >
+                취소
+              </button>
+              <button
+                onClick={submitAd}
+                className="flex-1 py-2.5 bg-slate-900 text-white font-black rounded-lg hover:bg-black transition-all text-[13px] uppercase tracking-widest shadow-sm"
+              >
+                저장
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
