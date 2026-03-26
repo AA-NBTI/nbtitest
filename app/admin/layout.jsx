@@ -30,7 +30,7 @@ export default function AdminLayout({ children }) {
       
       {/* ───── Mobile Header (Hamburger) ───── */}
       <header className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-[#18181b] border-b border-zinc-800 z-[100] flex items-center justify-between px-6">
-         <Link href="/admin" className="flex items-center gap-2">
+         <Link href="/" className="flex items-center gap-2">
             <div className="w-8 h-8 bg-white rounded-lg flex items-center justify-center">
                <ShieldCheck className="text-zinc-900" size={18} />
             </div>
