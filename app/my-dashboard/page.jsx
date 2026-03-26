@@ -19,7 +19,7 @@ export default function MyDashboard() {
   const { user, loading: authLoading, signOut } = useAuth();
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState('insights');
+  const [activeTab, setActiveTab] = useState('reports');
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const router = useRouter();
 
@@ -103,6 +103,13 @@ export default function MyDashboard() {
         {/* 내비게이션 */}
         <nav className="space-y-1 flex-1">
           <button
+            onClick={() => { setActiveTab('reports'); setIsSidebarOpen(false); }}
+            className={`w-full flex items-center gap-3 p-3.5 rounded-xl font-bold text-sm transition-all ${activeTab === 'reports' ? 'bg-zinc-800 text-white shadow-lg' : 'text-zinc-500 hover:bg-zinc-800/50 hover:text-zinc-300'}`}
+          >
+            <Zap size={16} strokeWidth={2.5} />
+            <span className="tracking-tight text-[13.5px]">분석 리포트</span>
+          </button>
+          <button
             onClick={() => { setActiveTab('insights'); setIsSidebarOpen(false); }}
             className={`w-full flex items-center gap-3 p-3.5 rounded-xl font-bold text-sm transition-all ${activeTab === 'insights' ? 'bg-zinc-800 text-white shadow-lg' : 'text-zinc-500 hover:bg-zinc-800/50 hover:text-zinc-300'}`}
           >
@@ -133,7 +140,68 @@ export default function MyDashboard() {
       {/* ───── 메인 콘텐츠 ───── */}
       <main className="flex-1 lg:ml-[200px] overflow-y-auto min-h-screen pt-16 lg:pt-0 p-4 md:p-8 lg:p-10">
 
-        {activeTab === 'insights' ? (
+        {activeTab === 'reports' ? (
+          <div className="pt-8 space-y-8">
+            <div className="border-b border-slate-100 pb-8">
+              <h2 className="text-2xl font-black tracking-tighter text-slate-900 uppercase">분석 리포트</h2>
+              <p className="text-[14px] font-bold text-slate-400 mt-1 uppercase tracking-widest">나의 정체성을 보여주는 핵심 데이터 분석 결과</p>
+            </div>
+
+            {history.length > 0 ? (
+               <div className="max-w-4xl space-y-8">
+                  {/* 초대형 페르소나 카드 */}
+                  <div className="bg-slate-900 p-10 md:p-14 rounded-[3rem] text-white shadow-2xl relative overflow-hidden group">
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+                    
+                    <div className="relative z-10 flex flex-col md:flex-row md:items-end justify-between gap-8">
+                        <div>
+                           <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 rounded-full border border-white/20 mb-6">
+                              <ShieldCheck size={14} className="text-indigo-300" />
+                              <span className="text-[10px] font-black uppercase tracking-widest text-white">최종 인증된 페르소나</span>
+                           </div>
+                           <h2 className="text-7xl md:text-8xl font-black tracking-tighter leading-none">{history[0].mbti_type}</h2>
+                           <p className="text-indigo-300 text-[15px] font-black mt-6 uppercase tracking-widest leading-none">NBTI Identity Report</p>
+                        </div>
+                        <Link 
+                          href={`/results/${history[0].mbti_type}?score=${history[0].nti_score}&testType=${history[0].test_type}&grade=${history[0].nti_grade}&sessionId=${history[0].session_id}`}
+                          className="px-8 py-4 bg-indigo-600 text-white rounded-2xl font-black text-[14px] hover:bg-indigo-500 transition-all shadow-xl shadow-indigo-900/50 flex items-center justify-center gap-3 group"
+                        >
+                           상세 분석 열람 <ChevronRight size={18} strokeWidth={3} className="group-hover:translate-x-1 transition-transform" />
+                        </Link>
+                    </div>
+                  </div>
+
+                  {/* 핵심 지표 미니 카드 그리드 */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                     <div className="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm flex items-center gap-6">
+                        <div className="w-14 h-14 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-900 shadow-inner">
+                           <Activity size={24} />
+                        </div>
+                        <div>
+                           <p className="text-[12px] font-black text-slate-300 uppercase tracking-widest mb-1">최신 분석 엔진</p>
+                           <p className="text-lg font-black text-slate-900 uppercase">{history[0].test_type || 'STANDARD'}</p>
+                        </div>
+                     </div>
+                     <div className="bg-white p-8 rounded-3xl border border-slate-100 shadow-sm flex items-center gap-6">
+                        <div className="w-14 h-14 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-900 shadow-inner">
+                           <Zap size={24} />
+                        </div>
+                        <div>
+                           <p className="text-[12px] font-black text-slate-300 uppercase tracking-widest mb-1">분석 완료 시각</p>
+                           <p className="text-lg font-black text-slate-900 uppercase">{new Date(history[0].created_at).toLocaleDateString()}</p>
+                        </div>
+                     </div>
+                  </div>
+               </div>
+            ) : (
+                <div className="py-20 bg-slate-50 rounded-3xl border-2 border-dashed border-slate-200 text-center">
+                   <AlertCircle className="mx-auto text-slate-300 mb-4" size={48} strokeWidth={1} />
+                   <p className="text-slate-400 font-black text-[14px] uppercase tracking-widest">아직 진행된 결과가 없습니다</p>
+                   <Link href="/tests/basic" className="inline-block mt-4 text-indigo-600 font-bold underline underline-offset-4">첫 번째 테스트 시작하기</Link>
+                </div>
+            )}
+          </div>
+        ) : activeTab === 'insights' ? (
           <div className="pt-8">
             {/* ── 2분할 그리드 ── */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
@@ -157,33 +225,6 @@ export default function MyDashboard() {
                     </div>
                   ))}
                 </div>
-
-                {/* [추가] 나의 핵심 페르소나 (NBTI 결과 요약) */}
-                {history.length > 0 && (
-                  <div className="bg-indigo-600 p-7 rounded-[2rem] text-white shadow-xl shadow-indigo-100 relative overflow-hidden group">
-                     {/* 데코 레이어 */}
-                     <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl group-hover:scale-110 transition-transform" />
-                     
-                     <div className="relative z-10">
-                        <div className="flex items-center gap-2 mb-6">
-                           <Fingerprint size={16} className="text-indigo-200" />
-                           <p className="text-[11px] font-black uppercase tracking-widest text-indigo-100">나의 핵심 페르소나</p>
-                        </div>
-                        <div className="flex items-end justify-between">
-                           <div>
-                              <h2 className="text-5xl font-black tracking-tighter leading-none">{history[0].mbti_type}</h2>
-                              <p className="text-indigo-200 text-[13px] font-bold mt-3 uppercase tracking-widest">분석 기반 정체성</p>
-                           </div>
-                           <Link 
-                             href={`/results/${history[0].mbti_type}?score=${history[0].nti_score}&testType=${history[0].test_type}&grade=${history[0].nti_grade}&sessionId=${history[0].session_id}`}
-                             className="px-5 py-3 bg-white text-indigo-600 rounded-2xl font-black text-[12px] hover:bg-slate-50 transition-all shadow-lg flex items-center gap-2"
-                           >
-                              상세 리포트 <ChevronRight size={14} strokeWidth={3} />
-                           </Link>
-                        </div>
-                     </div>
-                  </div>
-                )}
 
 
                 {/* 성향 인사이트 카드 */}
