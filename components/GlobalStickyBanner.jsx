@@ -42,36 +42,36 @@ export function GlobalStickyBanner() {
         borderBottom: '1px solid rgba(226, 232, 240, 0.4)',
         display: 'flex',
         justifyContent: 'center',
-        alignItems: 'center'
+        alignItems: 'center',
+        padding: '0 1.5rem' // [수정] app/page.jsx의 main 외부 패딩(1.5rem)과 일치시킴
       }}>
          <div style={{ 
             width: '100%', 
             maxWidth: '480px',
-            padding: '0 1.5rem', // [중요] 버튼 padding(1.5rem)과 완벽 일치 → 홈으로↔일반형, 회원가입↔→ 수직 정렬
             display: 'flex', 
             justifyContent: 'space-between', 
             alignItems: 'center' 
          }}>
-            {/* 홈으로: 하단 '일반형' 글자와 폰트 속성(1rem, 700) 및 수직 라인 일치 */}
+            {/* 홈으로: 하단 '일반형' 글자와 수직 라인(페이지 1.5 + 버튼 1.5 = 3rem) 일치 */}
             <Link href="/" style={{ 
               textDecoration: 'none', 
               fontSize: '1rem', 
               fontWeight: '700', 
               color: '#111827',
               letterSpacing: '-0.02em',
-              paddingLeft: '1.5rem'
+              paddingLeft: '1.5rem' // 카드 버튼 내부 패딩(1.5rem)과 일치
             }}>
                홈으로
             </Link>
 
-            {/* 회원가입/대시보드: 하단 화살표(→) 라인과 폰트 속성(1rem, 700) 및 수직 라인 일치 */}
+            {/* 회원가입/대시보드: 하단 화살표(→) 라인과 수직 라인 대칭 일치 */}
             <Link href={user ? '/my-dashboard' : '/login?mode=signup'} style={{ 
               textDecoration: 'none', 
               fontSize: '1rem', 
               fontWeight: '700', 
               color: '#111827',
               letterSpacing: '-0.02em',
-              paddingRight: '1.5rem'
+              paddingRight: '1.5rem' // 카드 버튼 내부 패딩(1.5rem)과 일치
             }}>
                {user ? '대시보드' : '회원가입'}
             </Link>
