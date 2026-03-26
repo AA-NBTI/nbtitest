@@ -235,6 +235,9 @@ export default function AdsDashboard() {
                             <div className="flex items-center gap-2 mb-1 flex-wrap">
                               <span className="font-black text-[14px] text-slate-900 truncate">{ad.brand_name}</span>
                               <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{p.label}</span>
+                              <span className={`text-[9px] font-black px-1.5 py-0.5 rounded border ${ad.target_test === 'all' ? 'text-slate-400 border-slate-100 bg-slate-50' : 'text-indigo-500 border-indigo-100 bg-indigo-50'} uppercase`}>
+                                 {ad.target_test || 'all'}
+                              </span>
                             </div>
                             <p className="text-[13px] font-bold text-slate-500 truncate">{ad.title}</p>
                             <p className="text-[10px] font-black text-slate-300 uppercase tracking-wider mt-1">{ad.ad_id?.slice(0, 12)}...</p>
@@ -305,7 +308,7 @@ export default function AdsDashboard() {
               ))}
 
               <div className="space-y-1">
-                <label className="text-[11px] font-black uppercase text-slate-400 ml-1">상품 번호</label>
+                <label className="text-[11px] font-black uppercase text-slate-400 ml-1">상품 번호 (구좌)</label>
                 <select
                   className="w-full px-4 py-2.5 bg-slate-50 border border-slate-100 rounded-lg font-bold text-[13px] outline-none"
                   value={form.placement}
@@ -318,6 +321,20 @@ export default function AdsDashboard() {
                   <option value="RESULT_TOP">05 - 결과 상단</option>
                   <option value="RESULT_BOTTOM">06 - 결과 하단</option>
                   <option value="MAIN_TOP">07 - 메인 홈</option>
+                </select>
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-[11px] font-black uppercase text-slate-400 ml-1">적용 테스트 유형</label>
+                <select
+                  className="w-full px-4 py-2.5 bg-slate-50 border border-slate-100 rounded-lg font-bold text-[13px] outline-none"
+                  value={form.target_test}
+                  onChange={(e) => setForm({ ...form, target_test: e.target.value })}
+                >
+                  <option value="all">전체 (All)</option>
+                  <option value="basic">일반형 (Basic)</option>
+                  <option value="love">연애형 (Love)</option>
+                  <option value="work">직장형 (Work)</option>
                 </select>
               </div>
 
