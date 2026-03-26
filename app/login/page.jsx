@@ -5,12 +5,12 @@
  * 기능: 통합 로그인/회원가입 페이지 (최종 미니멀리즘 - 보조 버튼 제거 및 한글 전용 14px 탭)
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { LogIn, Mail, Lock, UserPlus } from 'lucide-react';
 
-export default function AuthPage() {
+function AuthContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   
@@ -142,5 +142,17 @@ export default function AuthPage() {
         </footer>
       </div>
     </div>
+  );
+}
+
+export default function AuthPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-[#fafafa] flex flex-col items-center justify-center p-20 text-center">
+        <div className="w-8 h-8 rounded-full border-4 border-slate-100 border-t-slate-900 animate-spin mb-4" />
+      </div>
+    }>
+      <AuthContent />
+    </Suspense>
   );
 }
