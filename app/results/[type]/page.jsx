@@ -59,7 +59,7 @@ function ResultContent() {
       flexDirection: 'column',
       alignItems: 'center',
       justifyContent: 'center',
-      padding: '2rem 1.5rem',
+      padding: '140px 1.5rem 4rem', // 상단 고정 배너 가림 방지 (140px)
       fontFamily: "'Apple SD Gothic Neo', sans-serif",
       color: '#111827'
     }}>

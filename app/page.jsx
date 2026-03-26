@@ -24,7 +24,7 @@ export default function LandingPage() {
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
-        padding: '80px 1.5rem 4rem', // 상단 여백 설정 (80px)
+        padding: '140px 1.5rem 4rem', // 상단 고정 배너 가림 방지 (140px)
         fontFamily: "'Pretendard', 'Apple SD Gothic Neo', sans-serif",
       }}>
         {/* 헤더 (기존 중앙 정렬 복구) */}
