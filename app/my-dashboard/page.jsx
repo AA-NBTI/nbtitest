@@ -158,6 +158,33 @@ export default function MyDashboard() {
                   ))}
                 </div>
 
+                {/* [추가] 나의 핵심 페르소나 (NBTI 결과 요약) */}
+                {history.length > 0 && (
+                  <div className="bg-indigo-600 p-7 rounded-[2rem] text-white shadow-xl shadow-indigo-100 relative overflow-hidden group">
+                     {/* 데코 레이어 */}
+                     <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl group-hover:scale-110 transition-transform" />
+                     
+                     <div className="relative z-10">
+                        <div className="flex items-center gap-2 mb-6">
+                           <Fingerprint size={16} className="text-indigo-200" />
+                           <p className="text-[11px] font-black uppercase tracking-widest text-indigo-100">나의 핵심 페르소나</p>
+                        </div>
+                        <div className="flex items-end justify-between">
+                           <div>
+                              <h2 className="text-5xl font-black tracking-tighter leading-none">{history[0].mbti_type}</h2>
+                              <p className="text-indigo-200 text-[13px] font-bold mt-3 uppercase tracking-widest">분석 기반 정체성</p>
+                           </div>
+                           <Link 
+                             href={`/results/${history[0].mbti_type}?score=${history[0].nti_score}&testType=${history[0].test_type}&grade=${history[0].nti_grade}&sessionId=${history[0].session_id}`}
+                             className="px-5 py-3 bg-white text-indigo-600 rounded-2xl font-black text-[12px] hover:bg-slate-50 transition-all shadow-lg flex items-center gap-2"
+                           >
+                              상세 리포트 <ChevronRight size={14} strokeWidth={3} />
+                           </Link>
+                        </div>
+                     </div>
+                  </div>
+                )}
+
 
                 {/* 성향 인사이트 카드 */}
                 {consistency.length > 0 && (() => {
@@ -310,21 +337,32 @@ export default function MyDashboard() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 pb-16">
               {history.slice(0, 15).map((h) => (
-                <div key={h.id} className="p-7 bg-white border border-slate-100 rounded-xl shadow-sm hover:shadow-2xl hover:shadow-slate-100 transition-all group overflow-hidden relative">
+                <Link 
+                  key={h.session_id || h.id} 
+                  href={`/results/${h.mbti_type}?score=${h.nti_score}&testType=${h.test_type || 'basic'}&grade=${h.nti_grade}&sessionId=${h.session_id}`}
+                  className="p-7 bg-white border border-slate-100 rounded-xl shadow-sm hover:shadow-2xl hover:shadow-indigo-100/50 transition-all group overflow-hidden relative block no-underline"
+                >
                   <div className="flex justify-between items-start mb-6">
                     <span className="text-[11px] font-black text-slate-300 uppercase tracking-widest">{new Date(h.created_at).toLocaleDateString()}</span>
-                    <div className="w-9 h-9 bg-slate-50 rounded-xl flex items-center justify-center text-slate-400 group-hover:bg-slate-900 group-hover:text-white transition-all">
-                      <PlusCircle size={16} />
+                    <div className="w-9 h-9 bg-slate-50 rounded-xl flex items-center justify-center text-slate-400 group-hover:bg-indigo-600 group-hover:text-white transition-all">
+                      <Zap size={16} fill="currentColor" />
                     </div>
                   </div>
-                  <p className="text-4xl font-black text-slate-900 tracking-tighter mb-2">{h.nti_type}</p>
+                  <p className="text-4xl font-black text-slate-900 tracking-tighter mb-2">{h.mbti_type}</p>
                   <p className="text-[12px] font-black text-slate-400 uppercase tracking-widest mb-4">분석 엔진: {h.test_type || 'STANDARD'}</p>
                   <div className="pt-4 border-t border-slate-50 flex items-center justify-between">
-                    <span className="text-[12px] font-black text-slate-900 uppercase">분석 결과 보기</span>
-                    <ChevronRight size={15} strokeWidth={4} className="text-slate-900" />
+                    <span className="text-[12px] font-black text-indigo-600 uppercase group-hover:underline">상세 리포트 보기</span>
+                    <ChevronRight size={15} strokeWidth={4} className="text-indigo-600 transition-transform group-hover:translate-x-1" />
                   </div>
-                </div>
+                </Link>
               ))}
+              {history.length === 0 && (
+                <div className="col-span-full py-20 bg-slate-50 rounded-3xl border-2 border-dashed border-slate-200 text-center">
+                   <AlertCircle className="mx-auto text-slate-300 mb-4" size={48} strokeWidth={1} />
+                   <p className="text-slate-400 font-black text-[14px] uppercase tracking-widest">아직 진행된 결과가 없습니다</p>
+                   <Link href="/tests/basic" className="inline-block mt-4 text-indigo-600 font-bold underline underline-offset-4">첫 번째 테스트 시작하기</Link>
+                </div>
+              )}
             </div>
           </div>
         )}
